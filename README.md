@@ -1,8 +1,12 @@
-# 🔷 Hexa Framework
+<div align="center">
+  <img src="https://raw.githubusercontent.com/lutfianrhdn/hexa-framework/master/hexa-framework-logo.png" alt="Hexa Framework" width="600">
+  
+  # 🔷 Hexa Framework
 
-> **Hexagonal Architecture TypeScript Framework for Building Backend APIs**
-> 
-> Created by **lutfian.rhdn**
+  > **Hexagonal Architecture TypeScript Framework for Building Backend APIs**
+  > 
+  > Created by **lutfian.rhdn**
+</div>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
