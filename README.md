@@ -7,8 +7,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
 [![Node](https://img.shields.io/badge/Node-%3E%3D18-green)](https://nodejs.org/)
-[![npm version](https://img.shields.io/npm/v/@hexa-framework/core.svg)](https://www.npmjs.com/package/@hexa-framework/core)
-[![GitHub](https://img.shields.io/github/stars/lutfian-rhdn/hexa-framework?style=social)](https://github.com/lutfian-rhdn/hexa-framework)
+[![npm version](https://img.shields.io/npm/v/@hexa-framework/core.svg?style=flat)](https://www.npmjs.com/package/@hexa-framework/core)
+[![npm downloads](https://img.shields.io/npm/dm/@hexa-framework/core.svg?style=flat)](https://www.npmjs.com/package/@hexa-framework/core)
+[![GitHub stars](https://img.shields.io/github/stars/lutfian-rhdn/hexa-framework?style=social)](https://github.com/lutfian-rhdn/hexa-framework)
 
 ## 🎯 Apa itu Hexa Framework?
 
