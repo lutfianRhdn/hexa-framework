@@ -1,0 +1,1 @@
+export { generateMiddleware } from './service';

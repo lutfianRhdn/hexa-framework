@@ -1,7 +1,7 @@
 {
   "name": "create-hexa-framework-app",
-  "version": "1.0.1",
-  "description": "Create Hexa Framework project",
+  "version": "2.1.1",
+  "description": "Create Hexa Framework project with customizable templates, databases, and transport layers. Includes powerful CLI like Laravel Artisan!",
   "bin": {
     "create-hexa-app": "./dist/index.js"
   },
@@ -30,7 +30,8 @@
     "url": "https://github.com/lutfian-rhdn/hexa-framework/issues"
   },
   "files": [
-    "dist"
+    "dist",
+    "cli-templates"
   ],
   "dependencies": {
     "commander": "^11.1.0",

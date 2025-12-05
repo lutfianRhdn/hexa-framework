@@ -1,20 +1,46 @@
 # 🚀 create-hexa-app
 
-Scaffold Hexa Framework project dengan cepat dan mudah.
+Scaffold Hexa Framework project dengan cepat dan mudah. **Now with powerful CLI like Laravel Artisan!** ⚡
+
+## ✨ What's New in v2.1.0
+
+🔥 **Hexa CLI - Powerful Development Tools!**
+
+Generate complete CRUD systems in seconds:
+
+```bash
+# Create a new project
+npx create-hexa-framework-app my-api
+
+# Generate complete CRUD with 7 files + Prisma model
+cd my-api
+npm run hexa generate crud Product -- --fields "name:string,price:number,stock:number"
+
+# Output:
+# ✔ Entity generated
+# ✔ Repository generated
+# ✔ Service generated
+# ✔ Controller generated
+# ✔ Router generated
+# ✔ Validation schemas generated
+# ✔ Prisma model generated
+```
+
+[📖 Read Full CLI Documentation](./HEXA_CLI_GUIDE.md)
 
 ## 📦 Installation
 
 ### Using npx (Recommended)
 
 ```bash
-npx create-hexa-app my-api
+npx create-hexa-framework-app my-api
 ```
 
 ### Global Installation
 
 ```bash
-npm install -g create-hexa-app
-create-hexa-app my-api
+npm install -g create-hexa-framework-app
+create-hexa-framework-app my-api
 ```
 
 ## 🎯 Usage
@@ -22,18 +48,34 @@ create-hexa-app my-api
 ### Interactive Mode
 
 ```bash
-npx create-hexa-app
+npx create-hexa-framework-app
 ```
 
 Akan muncul prompt:
 ```
 ? Enter project name: my-blog-api
+? Select template: (Use arrow keys)
+  ❯ Full Auth - JWT + Refresh Token with Express
+    Basic Auth - Simple JWT Auth
+    Empty - Blank Hexa project
 ```
 
 ### Direct Mode
 
 ```bash
-npx create-hexa-app my-blog-api
+npx create-hexa-framework-app my-blog-api --template full-auth --database postgresql --transports rest,graphql
+```
+
+### With CLI Commands
+
+After creating your project:
+
+```bash
+cd my-blog-api
+npm run hexa list              # Show all commands
+npm run hexa generate crud Post   # Generate CRUD
+npm run hexa db migrate        # Run migrations
+npm run hexa serve             # Start dev server
 ```
 
 ## 📂 Generated Project Structure

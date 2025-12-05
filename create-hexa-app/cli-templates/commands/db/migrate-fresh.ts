@@ -1,0 +1,1 @@
+export { runMigrationFresh } from './migrate';

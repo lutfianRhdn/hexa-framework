@@ -1,0 +1,1 @@
+export { generateDto } from './service';
