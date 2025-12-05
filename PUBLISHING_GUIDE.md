@@ -36,9 +36,9 @@ git branch -M main
 git push -u origin main
 ```
 
-**Contoh jika username GitHub adalah lutfian-rhdn:**
+**Contoh jika username GitHub adalah lutfianrhdn:**
 ```bash
-git remote add origin https://github.com/lutfian-rhdn/hexa-framework.git
+git remote add origin https://github.com/lutfianrhdn/hexa-framework.git
 git branch -M main
 git push -u origin main
 ```

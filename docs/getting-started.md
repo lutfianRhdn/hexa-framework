@@ -342,7 +342,7 @@ Jika Anda menemui masalah:
 
 1. Check [documentation](../README.md)
 2. Lihat [examples](../examples/)
-3. Buka [GitHub Issues](https://github.com/lutfian-rhdn/hexa-framework/issues)
+3. Buka [GitHub Issues](https://github.com/lutfianrhdn/hexa-framework/issues)
 
 ---
 

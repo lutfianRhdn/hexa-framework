@@ -9,7 +9,7 @@
 [![Node](https://img.shields.io/badge/Node-%3E%3D18-green)](https://nodejs.org/)
 [![npm version](https://img.shields.io/npm/v/hexa-framework-core.svg?style=flat)](https://www.npmjs.com/package/hexa-framework-core)
 [![npm downloads](https://img.shields.io/npm/dm/hexa-framework-core.svg?style=flat)](https://www.npmjs.com/package/hexa-framework-core)
-[![GitHub stars](https://img.shields.io/github/stars/lutfian-rhdn/hexa-framework?style=social)](https://github.com/lutfian-rhdn/hexa-framework)
+[![GitHub stars](https://img.shields.io/github/stars/lutfianrhdn/hexa-framework?style=social)](https://github.com/lutfianrhdn/hexa-framework)
 
 ## 🎉 NEW in v1.0.1!
 

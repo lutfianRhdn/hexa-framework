@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="https://raw.githubusercontent.com/lutfianrhdn/hexa-framework/master/hexa-framework-logo.png" alt="Hexa Framework Logo" width="600">
+</div>
+
 # 🎯 LANGKAH SELANJUTNYA - SIAP PUBLISH!
 
 ## ✅ Status: Framework LENGKAP & SIAP DIGUNAKAN!
@@ -44,7 +48,7 @@ Ikuti file **DEPLOY_NOW.md** untuk publish ke npm dan GitHub.
 npm login
 
 # 2. Create GitHub repo & push
-git remote add origin https://github.com/lutfian-rhdn/hexa-framework.git
+git remote add origin https://github.com/lutfianrhdn/hexa-framework.git
 git push -u origin master
 
 # 3. Publish packages

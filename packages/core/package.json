@@ -24,12 +24,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lutfian-rhdn/hexa-framework.git",
+    "url": "https://github.com/lutfianrhdn/hexa-framework.git",
     "directory": "packages/core"
   },
-  "homepage": "https://github.com/lutfian-rhdn/hexa-framework#readme",
+  "homepage": "https://github.com/lutfianrhdn/hexa-framework#readme",
   "bugs": {
-    "url": "https://github.com/lutfian-rhdn/hexa-framework/issues"
+    "url": "https://github.com/lutfianrhdn/hexa-framework/issues"
   },
   "files": [
     "dist",
@@ -51,3 +51,4 @@
     "@prisma/client": "^5.7.0"
   }
 }
+

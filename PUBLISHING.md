@@ -29,7 +29,7 @@ Panduan lengkap untuk publish Hexa Framework ke GitHub dan npm.
 
 ```bash
 # Add remote repository
-git remote add origin https://github.com/lutfian-rhdn/hexa-framework.git
+git remote add origin https://github.com/lutfianrhdn/hexa-framework.git
 
 # Push code
 git push -u origin master
@@ -37,7 +37,7 @@ git push -u origin master
 
 ### 1.3 Verify
 
-- Buka https://github.com/lutfian-rhdn/hexa-framework
+- Buka https://github.com/lutfianrhdn/hexa-framework
 - Pastikan semua file sudah ada
 - Check README tampil dengan baik
 
@@ -297,7 +297,7 @@ hexa generate resource user
 ```
 
 ### Links:
-- **GitHub:** https://github.com/lutfian-rhdn/hexa-framework
+- **GitHub:** https://github.com/lutfianrhdn/hexa-framework
 - **npm Core:** https://npmjs.com/package/@hexa-framework/core
 - **npm CLI:** https://npmjs.com/package/@hexa-framework/cli
 - **npm Starter:** https://npmjs.com/package/create-hexa-app

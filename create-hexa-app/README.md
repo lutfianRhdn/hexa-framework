@@ -1,8 +1,24 @@
-# 🚀 create-hexa-app
+# 🚀 create-hexa-framework-app
 
-Scaffold Hexa Framework project dengan cepat dan mudah. **Now with powerful CLI like Laravel Artisan!** ⚡
+<div align="center">
 
-## ✨ What's New in v2.1.0
+[![npm version](https://img.shields.io/npm/v/create-hexa-framework-app.svg)](https://www.npmjs.com/package/create-hexa-framework-app)
+[![npm downloads](https://img.shields.io/npm/dm/create-hexa-framework-app.svg)](https://www.npmjs.com/package/create-hexa-framework-app)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
+
+**The most productive way to build TypeScript APIs with hexagonal architecture**
+
+[Quick Start](#-installation) • [CLI Guide](./HEXA_CLI_GUIDE.md) • [Release Notes](./RELEASE_NOTES_v2.1.1.md) • [Changelog](./CHANGELOG.md)
+
+</div>
+
+---
+
+Scaffold Hexa Framework projects with **powerful CLI tools** similar to Laravel Artisan! Generate complete CRUD systems in seconds, manage databases, and boost your productivity by 600x. ⚡
+
+## ✨ What's New in v2.1.1
 
 🔥 **Hexa CLI - Powerful Development Tools!**
 
@@ -228,16 +244,16 @@ curl http://localhost:3000/api/v1/posts
 ## 📚 Documentation
 
 Dokumentasi lengkap tersedia di:
-- [Getting Started](https://github.com/lutfian-rhdn/hexa-framework/blob/master/docs/getting-started.md)
-- [Architecture Guide](https://github.com/lutfian-rhdn/hexa-framework/blob/master/docs/architecture.md)
-- [CLI Reference](https://github.com/lutfian-rhdn/hexa-framework/blob/master/docs/cli-reference.md)
-- [API Reference](https://github.com/lutfian-rhdn/hexa-framework/blob/master/docs/api-reference.md)
-- [Deployment Guide](https://github.com/lutfian-rhdn/hexa-framework/blob/master/docs/deployment.md)
-- [Best Practices](https://github.com/lutfian-rhdn/hexa-framework/blob/master/docs/best-practices.md)
+- [Getting Started](https://github.com/lutfianrhdn/hexa-framework/blob/master/docs/getting-started.md)
+- [Architecture Guide](https://github.com/lutfianrhdn/hexa-framework/blob/master/docs/architecture.md)
+- [CLI Reference](https://github.com/lutfianrhdn/hexa-framework/blob/master/docs/cli-reference.md)
+- [API Reference](https://github.com/lutfianrhdn/hexa-framework/blob/master/docs/api-reference.md)
+- [Deployment Guide](https://github.com/lutfianrhdn/hexa-framework/blob/master/docs/deployment.md)
+- [Best Practices](https://github.com/lutfianrhdn/hexa-framework/blob/master/docs/best-practices.md)
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please check our [Contributing Guide](https://github.com/lutfian-rhdn/hexa-framework/blob/master/CONTRIBUTING.md).
+Contributions are welcome! Please check our [Contributing Guide](https://github.com/lutfianrhdn/hexa-framework/blob/master/CONTRIBUTING.md).
 
 ## 📄 License
 
@@ -245,7 +261,7 @@ MIT © lutfian.rhdn
 
 ## 🔗 Links
 
-- [GitHub Repository](https://github.com/lutfian-rhdn/hexa-framework)
+- [GitHub Repository](https://github.com/lutfianrhdn/hexa-framework)
 - [npm Package](https://www.npmjs.com/package/create-hexa-app)
 - [Core Package](https://www.npmjs.com/package/@hexa-framework/core)
 - [CLI Package](https://www.npmjs.com/package/@hexa-framework/cli)

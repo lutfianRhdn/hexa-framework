@@ -54,7 +54,7 @@ Expected: Menampilkan username npm Anda
 4. **Visibility:** Public
 5. **PENTING:** JANGAN centang "Initialize this repository with a README"
 6. Klik **"Create repository"**
-7. **Copy URL** yang muncul (contoh: https://github.com/lutfian-rhdn/hexa-framework.git)
+7. **Copy URL** yang muncul (contoh: https://github.com/lutfianrhdn/hexa-framework.git)
 
 **Option B: Via GitHub CLI (jika punya gh CLI)**
 ```bash
@@ -70,7 +70,7 @@ gh repo create hexa-framework --public --description "Hexagonal Architecture Typ
 cd d:\projects\OPShapesite\hexa-framework
 
 # Add remote (ganti URL dengan URL repository Anda)
-git remote add origin https://github.com/lutfian-rhdn/hexa-framework.git
+git remote add origin https://github.com/lutfianrhdn/hexa-framework.git
 
 # Push ke GitHub
 git push -u origin master
@@ -82,7 +82,7 @@ git branch -M main
 git push -u origin main
 ```
 
-**Verify:** Buka https://github.com/lutfian-rhdn/hexa-framework dan pastikan semua file sudah ada.
+**Verify:** Buka https://github.com/lutfianrhdn/hexa-framework dan pastikan semua file sudah ada.
 
 ---
 
@@ -266,9 +266,9 @@ After successful deployment:
 - **Starter:** https://www.npmjs.com/package/create-hexa-app
 
 ### GitHub:
-- **Repository:** https://github.com/lutfian-rhdn/hexa-framework
-- **Issues:** https://github.com/lutfian-rhdn/hexa-framework/issues
-- **Docs:** https://github.com/lutfian-rhdn/hexa-framework/tree/master/docs
+- **Repository:** https://github.com/lutfianrhdn/hexa-framework
+- **Issues:** https://github.com/lutfianrhdn/hexa-framework/issues
+- **Docs:** https://github.com/lutfianrhdn/hexa-framework/tree/master/docs
 
 ### Quick Start Commands:
 ```bash
@@ -383,7 +383,7 @@ git push origin v1.0.0
 ```
 
 Then create release on GitHub:
-1. Go to: https://github.com/lutfian-rhdn/hexa-framework/releases/new
+1. Go to: https://github.com/lutfianrhdn/hexa-framework/releases/new
 2. Choose tag: v1.0.0
 3. Title: `v1.0.0 - Initial Release`
 4. Description: Copy from CHANGELOG or write release notes
@@ -419,7 +419,7 @@ A TypeScript framework for building scalable REST APIs with Hexagonal Architectu
 Get started:
 npx create-hexa-app my-api
 
-GitHub: https://github.com/lutfian-rhdn/hexa-framework
+GitHub: https://github.com/lutfianrhdn/hexa-framework
 npm: https://npmjs.com/package/create-hexa-app
 ```
 
