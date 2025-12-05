@@ -2,6 +2,59 @@
 
 All notable changes to the Hexa Framework CLI will be documented in this file.
 
+## [1.2.0] - 2024-12-05
+
+### 🎉 Added - Adapter & Transport Layer Generation
+
+This release adds powerful commands to generate adapters and transport layers following hexagonal architecture principles.
+
+### Added
+
+#### Adapter Commands (New!)
+- **make:adapter** - Create adapter classes for external integrations
+  - `hexa make:adapter <name>` - Default database adapter
+  - `hexa make:adapter <name> --type database` - Database/Repository adapter with Prisma
+  - `hexa make:adapter <name> --type cache` - Cache adapter with TTL support
+  - `hexa make:adapter <name> --type messaging` - Message queue/pub-sub adapter
+  - `hexa make:adapter <name> --type queue` - Queue adapter
+  - Custom types supported for any external service
+
+#### Transport Commands (New!)
+- **make:transport** - Create transport layer for different protocols
+  - `hexa make:transport <name>` - Default HTTP/REST transport with Express router
+  - `hexa make:transport <name> --type http` - HTTP REST API transport
+  - `hexa make:transport <name> --type rest` - REST API transport (alias)
+  - `hexa make:transport <name> --type graphql` - GraphQL schema and resolvers
+  - `hexa make:transport <name> --type grpc` - gRPC service implementation
+  - `hexa make:transport <name> --type websocket` - WebSocket real-time transport
+
+### Templates Included
+
+#### Adapter Templates
+1. **Database Adapter** - Full CRUD with Prisma client integration
+2. **Cache Adapter** - In-memory cache with TTL and expiration
+3. **Messaging Adapter** - Pub/sub pattern with subscribe/unsubscribe
+4. **Generic Adapter** - Flexible template for any external service
+
+#### Transport Templates
+1. **HTTP/REST Transport** - Complete Express router with CRUD routes
+2. **GraphQL Transport** - Type definitions, queries, and mutations
+3. **gRPC Transport** - Service interface with RPC methods
+4. **WebSocket Transport** - Real-time bidirectional communication
+5. **Generic Transport** - Flexible template for custom protocols
+
+### Enhanced
+- Updated help command with new make:adapter and make:transport
+- Improved command descriptions and examples
+- Better type safety and error handling
+
+### Architecture Benefits
+- **Hexagonal Architecture** - Clean separation between core logic and external concerns
+- **Port & Adapter Pattern** - Adapters implement ports (interfaces) for external systems
+- **Transport Layer** - Independent communication protocols without core logic coupling
+- **Testability** - Easy to mock adapters and transports for testing
+- **Flexibility** - Switch implementations without changing core business logic
+
 ## [1.1.0] - 2024-01-XX
 
 ### 🎉 Major Update - Laravel Artisan-like Commands

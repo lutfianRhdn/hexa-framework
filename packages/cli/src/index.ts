@@ -8,14 +8,14 @@ import { verifyPermissions } from './commands/verify';
 import { migrate, migrateFresh, migrateReset, migrateRollback, migrateStatus, seed } from './commands/migrate';
 import { serve, build } from './commands/serve';
 import { routeList, controllerList, middlewareList } from './commands/list';
-import { makeController, makeService, makeRepository, makeEntity, makeMiddleware, makeDto } from './commands/make';
+import { makeController, makeService, makeRepository, makeEntity, makeMiddleware, makeDto, makeAdapter, makeTransport } from './commands/make';
 
 const program = new Command();
 
 program
   .name('hexa')
   .description('🔷 Hexa Framework CLI - Like Laravel Artisan for TypeScript')
-  .version('1.1.0');
+  .version('1.2.0');
 
 // Generate command
 program
@@ -102,6 +102,32 @@ program
   .action(async (name) => {
     try {
       await makeDto(name);
+    } catch (error) {
+      console.error(chalk.red('Error:'), error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('make:adapter <name>')
+  .description('Create a new adapter class')
+  .option('-t, --type <type>', 'Adapter type (database, cache, messaging, queue)', 'database')
+  .action(async (name, options) => {
+    try {
+      await makeAdapter(name, options);
+    } catch (error) {
+      console.error(chalk.red('Error:'), error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('make:transport <name>')
+  .description('Create a new transport layer')
+  .option('-t, --type <type>', 'Transport type (http, rest, graphql, grpc, websocket)', 'http')
+  .action(async (name, options) => {
+    try {
+      await makeTransport(name, options);
     } catch (error) {
       console.error(chalk.red('Error:'), error);
       process.exit(1);
@@ -296,7 +322,7 @@ program
     console.log(chalk.gray('Hexagonal Architecture TypeScript Framework'));
     console.log(chalk.gray('Like Laravel Artisan for TypeScript'));
     console.log(chalk.gray('by lutfian.rhdn\n'));
-    console.log(chalk.white('Version:'), '1.1.0');
+    console.log(chalk.white('Version:'), '1.2.0');
     console.log(chalk.white('License:'), 'MIT\n');
     console.log(chalk.white.bold('Available Commands:\n'));
     console.log(chalk.green('Generation:'));
@@ -309,7 +335,9 @@ program
     console.log('  hexa make:repository <name>   - Create a new repository');
     console.log('  hexa make:entity <name>       - Create a new entity');
     console.log('  hexa make:middleware <name>   - Create a new middleware');
-    console.log('  hexa make:dto <name>          - Create a new DTO\n');
+    console.log('  hexa make:dto <name>          - Create a new DTO');
+    console.log('  hexa make:adapter <name>      - Create a new adapter (database, cache, etc.)');
+    console.log('  hexa make:transport <name>    - Create a new transport (http, graphql, etc.)\n');
     console.log(chalk.green('Database:'));
     console.log('  hexa migrate               - Run database migrations');
     console.log('  hexa migrate:fresh         - Drop all tables and re-migrate');

@@ -184,6 +184,66 @@ export async function makeDto(name: string) {
   }
 }
 
+export async function makeAdapter(name: string, options: { type?: string }) {
+  const adapterType = options.type || 'database';
+  const spinner = ora(`Creating ${adapterType} adapter: ${name}Adapter`).start();
+  
+  try {
+    const className = `${toPascalCase(name)}Adapter`;
+    const adapterDir = path.join(process.cwd(), 'src', 'adapters', adapterType);
+    
+    if (!fs.existsSync(adapterDir)) {
+      fs.mkdirSync(adapterDir, { recursive: true });
+    }
+    
+    const adapterPath = path.join(adapterDir, `${className}.ts`);
+    
+    if (fs.existsSync(adapterPath)) {
+      spinner.fail(`Adapter ${className} already exists`);
+      return;
+    }
+    
+    const content = generateAdapter(name, adapterType);
+    fs.writeFileSync(adapterPath, content);
+    
+    spinner.succeed(`Adapter created: ${chalk.green(adapterPath)}`);
+  } catch (error: any) {
+    spinner.fail('Failed to create adapter');
+    console.error(chalk.red(error.message));
+    process.exit(1);
+  }
+}
+
+export async function makeTransport(name: string, options: { type?: string }) {
+  const transportType = options.type || 'http';
+  const spinner = ora(`Creating ${transportType} transport: ${name}Transport`).start();
+  
+  try {
+    const className = `${toPascalCase(name)}Transport`;
+    const transportDir = path.join(process.cwd(), 'src', 'transports', transportType);
+    
+    if (!fs.existsSync(transportDir)) {
+      fs.mkdirSync(transportDir, { recursive: true });
+    }
+    
+    const transportPath = path.join(transportDir, `${className}.ts`);
+    
+    if (fs.existsSync(transportPath)) {
+      spinner.fail(`Transport ${className} already exists`);
+      return;
+    }
+    
+    const content = generateTransport(name, transportType);
+    fs.writeFileSync(transportPath, content);
+    
+    spinner.succeed(`Transport created: ${chalk.green(transportPath)}`);
+  } catch (error: any) {
+    spinner.fail('Failed to create transport');
+    console.error(chalk.red(error.message));
+    process.exit(1);
+  }
+}
+
 // Template generators
 function generateController(name: string): string {
   const className = `${toPascalCase(name)}Controller`;
@@ -410,4 +470,457 @@ function generateDto(name: string): string {
   }
 }
 `;
+}
+
+function generateAdapter(name: string, adapterType: string): string {
+  const className = `${toPascalCase(name)}Adapter`;
+  const entityName = toPascalCase(name);
+  
+  if (adapterType === 'database' || adapterType === 'repositories') {
+    return `import { PrismaClient } from '@prisma/client';
+
+/**
+ * ${className} - Database Adapter
+ * Handles data persistence for ${entityName}
+ */
+export class ${className} {
+  constructor(private prisma: PrismaClient) {}
+
+  async findAll(): Promise<any[]> {
+    // Implement database query
+    return await this.prisma.${toCamelCase(name)}.findMany();
+  }
+
+  async findById(id: string): Promise<any | null> {
+    return await this.prisma.${toCamelCase(name)}.findUnique({
+      where: { id }
+    });
+  }
+
+  async create(data: any): Promise<any> {
+    return await this.prisma.${toCamelCase(name)}.create({
+      data
+    });
+  }
+
+  async update(id: string, data: any): Promise<any> {
+    return await this.prisma.${toCamelCase(name)}.update({
+      where: { id },
+      data
+    });
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.${toCamelCase(name)}.delete({
+      where: { id }
+    });
+  }
+}
+`;
+  } else if (adapterType === 'cache') {
+    return `/**
+ * ${className} - Cache Adapter
+ * Handles caching operations for ${entityName}
+ */
+export class ${className} {
+  private cacheStore: Map<string, any> = new Map();
+  private ttl: number = 3600; // 1 hour default
+
+  async get(key: string): Promise<any | null> {
+    return this.cacheStore.get(key) || null;
+  }
+
+  async set(key: string, value: any, ttl?: number): Promise<void> {
+    this.cacheStore.set(key, value);
+    
+    // Set expiration
+    setTimeout(() => {
+      this.cacheStore.delete(key);
+    }, (ttl || this.ttl) * 1000);
+  }
+
+  async delete(key: string): Promise<void> {
+    this.cacheStore.delete(key);
+  }
+
+  async clear(): Promise<void> {
+    this.cacheStore.clear();
+  }
+
+  async has(key: string): Promise<boolean> {
+    return this.cacheStore.has(key);
+  }
+}
+`;
+  } else if (adapterType === 'messaging' || adapterType === 'queue') {
+    return `/**
+ * ${className} - Messaging/Queue Adapter
+ * Handles message queue operations for ${entityName}
+ */
+export class ${className} {
+  async send(message: any): Promise<void> {
+    // Implement message sending logic
+    console.log('Sending message:', message);
+  }
+
+  async receive(): Promise<any> {
+    // Implement message receiving logic
+    return null;
+  }
+
+  async subscribe(topic: string, handler: (message: any) => void): Promise<void> {
+    // Implement subscription logic
+    console.log(\`Subscribed to \${topic}\`);
+  }
+
+  async unsubscribe(topic: string): Promise<void> {
+    // Implement unsubscription logic
+    console.log(\`Unsubscribed from \${topic}\`);
+  }
+}
+`;
+  } else {
+    // Generic adapter
+    return `/**
+ * ${className} - ${adapterType} Adapter
+ * Handles external ${adapterType} integration for ${entityName}
+ */
+export class ${className} {
+  constructor() {
+    // Initialize adapter
+  }
+
+  async connect(): Promise<void> {
+    // Implement connection logic
+    console.log('${className} connected');
+  }
+
+  async disconnect(): Promise<void> {
+    // Implement disconnection logic
+    console.log('${className} disconnected');
+  }
+
+  async execute(operation: string, data?: any): Promise<any> {
+    // Implement operation execution
+    console.log(\`Executing \${operation}\`, data);
+    return null;
+  }
+}
+`;
+  }
+}
+
+function generateTransport(name: string, transportType: string): string {
+  const className = `${toPascalCase(name)}Transport`;
+  const routerName = `${toCamelCase(name)}Router`;
+  
+  if (transportType === 'http' || transportType === 'rest') {
+    return `import { Router, Request, Response, NextFunction } from 'express';
+import { ${toPascalCase(name)}Controller } from '../controllers/${toPascalCase(name)}Controller';
+
+/**
+ * ${className} - HTTP/REST Transport
+ * Handles HTTP routing and request/response for ${toPascalCase(name)}
+ */
+export class ${className} {
+  private router: Router;
+  private controller: ${toPascalCase(name)}Controller;
+
+  constructor(controller: ${toPascalCase(name)}Controller) {
+    this.router = Router();
+    this.controller = controller;
+    this.setupRoutes();
+  }
+
+  private setupRoutes(): void {
+    // GET all
+    this.router.get('/', (req: Request, res: Response, next: NextFunction) => {
+      this.controller.index(req, res, next);
+    });
+
+    // GET by ID
+    this.router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
+      this.controller.show(req, res, next);
+    });
+
+    // POST create
+    this.router.post('/', (req: Request, res: Response, next: NextFunction) => {
+      this.controller.store(req, res, next);
+    });
+
+    // PUT update
+    this.router.put('/:id', (req: Request, res: Response, next: NextFunction) => {
+      this.controller.update(req, res, next);
+    });
+
+    // DELETE
+    this.router.delete('/:id', (req: Request, res: Response, next: NextFunction) => {
+      this.controller.destroy(req, res, next);
+    });
+  }
+
+  getRouter(): Router {
+    return this.router;
+  }
+}
+
+// Export router instance
+export const ${routerName} = (controller: ${toPascalCase(name)}Controller) => {
+  const transport = new ${className}(controller);
+  return transport.getRouter();
+};
+`;
+  } else if (transportType === 'graphql') {
+    return `import { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList } from 'graphql';
+
+/**
+ * ${className} - GraphQL Transport
+ * Handles GraphQL schema and resolvers for ${toPascalCase(name)}
+ */
+
+// Define GraphQL Type
+const ${toPascalCase(name)}Type = new GraphQLObjectType({
+  name: '${toPascalCase(name)}',
+  fields: () => ({
+    id: { type: GraphQLID },
+    // Add your fields here
+    createdAt: { type: GraphQLString },
+    updatedAt: { type: GraphQLString }
+  })
+});
+
+// Query definitions
+export const ${toCamelCase(name)}Queries = {
+  ${toCamelCase(name)}: {
+    type: ${toPascalCase(name)}Type,
+    args: { id: { type: GraphQLID } },
+    resolve: async (parent: any, args: any, context: any) => {
+      // Implement resolver logic
+      return null;
+    }
+  },
+  ${toCamelCase(name)}List: {
+    type: new GraphQLList(${toPascalCase(name)}Type),
+    resolve: async (parent: any, args: any, context: any) => {
+      // Implement resolver logic
+      return [];
+    }
+  }
+};
+
+// Mutation definitions
+export const ${toCamelCase(name)}Mutations = {
+  create${toPascalCase(name)}: {
+    type: ${toPascalCase(name)}Type,
+    args: {
+      // Add input arguments
+    },
+    resolve: async (parent: any, args: any, context: any) => {
+      // Implement mutation logic
+      return null;
+    }
+  },
+  update${toPascalCase(name)}: {
+    type: ${toPascalCase(name)}Type,
+    args: {
+      id: { type: GraphQLID },
+      // Add input arguments
+    },
+    resolve: async (parent: any, args: any, context: any) => {
+      // Implement mutation logic
+      return null;
+    }
+  },
+  delete${toPascalCase(name)}: {
+    type: GraphQLID,
+    args: { id: { type: GraphQLID } },
+    resolve: async (parent: any, args: any, context: any) => {
+      // Implement mutation logic
+      return args.id;
+    }
+  }
+};
+`;
+  } else if (transportType === 'grpc') {
+    return `/**
+ * ${className} - gRPC Transport
+ * Handles gRPC service for ${toPascalCase(name)}
+ */
+
+interface I${toPascalCase(name)}Service {
+  Get${toPascalCase(name)}: (call: any, callback: any) => void;
+  List${toPascalCase(name)}: (call: any, callback: any) => void;
+  Create${toPascalCase(name)}: (call: any, callback: any) => void;
+  Update${toPascalCase(name)}: (call: any, callback: any) => void;
+  Delete${toPascalCase(name)}: (call: any, callback: any) => void;
+}
+
+export class ${className} implements I${toPascalCase(name)}Service {
+  Get${toPascalCase(name)}(call: any, callback: any): void {
+    // Implement Get logic
+    callback(null, { id: call.request.id });
+  }
+
+  List${toPascalCase(name)}(call: any, callback: any): void {
+    // Implement List logic
+    callback(null, { items: [] });
+  }
+
+  Create${toPascalCase(name)}(call: any, callback: any): void {
+    // Implement Create logic
+    callback(null, call.request);
+  }
+
+  Update${toPascalCase(name)}(call: any, callback: any): void {
+    // Implement Update logic
+    callback(null, call.request);
+  }
+
+  Delete${toPascalCase(name)}(call: any, callback: any): void {
+    // Implement Delete logic
+    callback(null, { success: true });
+  }
+}
+
+// Service definition for proto file:
+/*
+service ${toPascalCase(name)}Service {
+  rpc Get${toPascalCase(name)} (${toPascalCase(name)}Request) returns (${toPascalCase(name)}Response);
+  rpc List${toPascalCase(name)} (Empty) returns (${toPascalCase(name)}ListResponse);
+  rpc Create${toPascalCase(name)} (Create${toPascalCase(name)}Request) returns (${toPascalCase(name)}Response);
+  rpc Update${toPascalCase(name)} (Update${toPascalCase(name)}Request) returns (${toPascalCase(name)}Response);
+  rpc Delete${toPascalCase(name)} (Delete${toPascalCase(name)}Request) returns (DeleteResponse);
+}
+*/
+`;
+  } else if (transportType === 'websocket') {
+    return `import { Server as WebSocketServer, WebSocket } from 'ws';
+
+/**
+ * ${className} - WebSocket Transport
+ * Handles real-time WebSocket communication for ${toPascalCase(name)}
+ */
+export class ${className} {
+  private wss: WebSocketServer;
+  private clients: Set<WebSocket> = new Set();
+
+  constructor(port: number = 8080) {
+    this.wss = new WebSocketServer({ port });
+    this.setupListeners();
+  }
+
+  private setupListeners(): void {
+    this.wss.on('connection', (ws: WebSocket) => {
+      console.log('Client connected');
+      this.clients.add(ws);
+
+      ws.on('message', (message: string) => {
+        this.handleMessage(ws, message);
+      });
+
+      ws.on('close', () => {
+        console.log('Client disconnected');
+        this.clients.delete(ws);
+      });
+
+      ws.on('error', (error: Error) => {
+        console.error('WebSocket error:', error);
+      });
+    });
+  }
+
+  private handleMessage(ws: WebSocket, message: string): void {
+    try {
+      const data = JSON.parse(message.toString());
+      
+      // Handle different message types
+      switch (data.type) {
+        case 'get':
+          this.handleGet(ws, data);
+          break;
+        case 'create':
+          this.handleCreate(ws, data);
+          break;
+        case 'update':
+          this.handleUpdate(ws, data);
+          break;
+        case 'delete':
+          this.handleDelete(ws, data);
+          break;
+        default:
+          ws.send(JSON.stringify({ error: 'Unknown message type' }));
+      }
+    } catch (error) {
+      ws.send(JSON.stringify({ error: 'Invalid message format' }));
+    }
+  }
+
+  private handleGet(ws: WebSocket, data: any): void {
+    // Implement get logic
+    ws.send(JSON.stringify({ type: 'get', data: null }));
+  }
+
+  private handleCreate(ws: WebSocket, data: any): void {
+    // Implement create logic
+    this.broadcast({ type: 'created', data: data.payload });
+  }
+
+  private handleUpdate(ws: WebSocket, data: any): void {
+    // Implement update logic
+    this.broadcast({ type: 'updated', data: data.payload });
+  }
+
+  private handleDelete(ws: WebSocket, data: any): void {
+    // Implement delete logic
+    this.broadcast({ type: 'deleted', data: { id: data.id } });
+  }
+
+  private broadcast(message: any): void {
+    const json = JSON.stringify(message);
+    this.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(json);
+      }
+    });
+  }
+
+  close(): void {
+    this.wss.close();
+  }
+}
+`;
+  } else {
+    // Generic transport
+    return `/**
+ * ${className} - ${transportType} Transport
+ * Handles ${transportType} communication for ${toPascalCase(name)}
+ */
+export class ${className} {
+  constructor() {
+    // Initialize transport
+    this.setup();
+  }
+
+  private setup(): void {
+    // Setup transport logic
+    console.log('${className} transport initialized');
+  }
+
+  async send(data: any): Promise<void> {
+    // Implement send logic
+    console.log('Sending data:', data);
+  }
+
+  async receive(): Promise<any> {
+    // Implement receive logic
+    return null;
+  }
+
+  async close(): Promise<void> {
+    // Cleanup logic
+    console.log('${className} transport closed');
+  }
+}
+`;
+  }
 }
