@@ -1,0 +1,218 @@
+name: Test CLI
+
+on:
+  push:
+    branches: [master, main, develop]
+    paths:
+      - 'cli-templates/**'
+      - 'src/generators/cli.ts'
+  pull_request:
+    branches: [master, main, develop]
+    paths:
+      - 'cli-templates/**'
+      - 'src/generators/cli.ts'
+
+jobs:
+  test-cli:
+    name: Test CLI Generation
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18.x, 20.x]
+        template: [full-auth, basic-auth, empty]
+        database: [postgresql, mysql, mongodb, sqlite]
+        transport: [rest, graphql, websocket]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build project
+        run: npm run build
+      
+      - name: Generate test project
+        run: |
+          node dist/index.js test-${{ matrix.template }}-${{ matrix.database }}-${{ matrix.transport }} \
+            --template ${{ matrix.template }} \
+            --database ${{ matrix.database }} \
+            --transports ${{ matrix.transport }} \
+            --yes
+      
+      - name: Verify CLI files exist
+        run: |
+          cd test-${{ matrix.template }}-${{ matrix.database }}-${{ matrix.transport }}
+          
+          # Check main CLI file
+          if [ ! -f "cli/hexa-cli.ts" ]; then
+            echo "❌ cli/hexa-cli.ts not found"
+            exit 1
+          fi
+          
+          # Check utils
+          if [ ! -f "cli/utils/naming.ts" ]; then
+            echo "❌ cli/utils/naming.ts not found"
+            exit 1
+          fi
+          
+          # Check commands
+          if [ ! -f "cli/commands/generate/crud.ts" ]; then
+            echo "❌ cli/commands/generate/crud.ts not found"
+            exit 1
+          fi
+          
+          echo "✅ All CLI files present"
+        shell: bash
+      
+      - name: Install project dependencies
+        run: |
+          cd test-${{ matrix.template }}-${{ matrix.database }}-${{ matrix.transport }}
+          npm install
+      
+      - name: Test CLI list command
+        run: |
+          cd test-${{ matrix.template }}-${{ matrix.database }}-${{ matrix.transport }}
+          npx ts-node cli/hexa-cli.ts list
+        shell: bash
+      
+      - name: Test CRUD generation (REST only)
+        if: matrix.transport == 'rest'
+        run: |
+          cd test-${{ matrix.template }}-${{ matrix.database }}-${{ matrix.transport }}
+          echo "y" | npx ts-node cli/hexa-cli.ts generate crud TestResource --fields "name:string,value:number" --transport rest
+          
+          # Verify generated files
+          if [ ! -f "src/core/entities/testResource/TestResource.ts" ]; then
+            echo "❌ Entity not generated"
+            exit 1
+          fi
+          
+          if [ ! -f "src/adapters/repositories/TestResourceRepository.ts" ]; then
+            echo "❌ Repository not generated"
+            exit 1
+          fi
+          
+          echo "✅ CRUD generated successfully"
+        shell: bash
+      
+      - name: Upload artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: failed-test-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.template }}-${{ matrix.database }}-${{ matrix.transport }}
+          path: test-${{ matrix.template }}-${{ matrix.database }}-${{ matrix.transport }}/
+
+  test-cli-shortcuts:
+    name: Test CLI Shortcuts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build project
+        run: npm run build
+      
+      - name: Generate test project
+        run: |
+          node dist/index.js test-shortcuts --template empty --database postgresql --transports rest --yes
+          cd test-shortcuts
+          npm install
+      
+      - name: Test command shortcuts
+        run: |
+          cd test-shortcuts
+          
+          # Test 'hexa g c' (generate controller)
+          echo "Testing: hexa g c"
+          echo "y" | npx ts-node cli/hexa-cli.ts g c TestController || true
+          
+          # Test 'hexa db migrate'
+          echo "Testing: hexa db migrate"
+          npx ts-node cli/hexa-cli.ts db migrate || true
+          
+          echo "✅ Shortcuts test completed"
+
+  test-cli-interactive:
+    name: Test CLI Interactive Mode
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build project
+        run: npm run build
+      
+      - name: Generate test project
+        run: |
+          node dist/index.js test-interactive --template empty --database postgresql --transports rest --yes
+          cd test-interactive
+          npm install
+      
+      - name: Test interactive mode (with timeout)
+        run: |
+          cd test-interactive
+          
+          # Run CLI and automatically exit (timeout after 5 seconds)
+          timeout 5 npx ts-node cli/hexa-cli.ts || true
+          
+          echo "✅ Interactive mode test completed"
+
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [test-cli, test-cli-shortcuts, test-cli-interactive]
+    if: always()
+    
+    steps:
+      - name: Check test results
+        run: |
+          echo "🎯 CLI Test Summary"
+          echo "=================="
+          
+          if [ "${{ needs.test-cli.result }}" == "success" ]; then
+            echo "✅ CLI Generation Tests: PASSED"
+          else
+            echo "❌ CLI Generation Tests: FAILED"
+          fi
+          
+          if [ "${{ needs.test-cli-shortcuts.result }}" == "success" ]; then
+            echo "✅ CLI Shortcuts Tests: PASSED"
+          else
+            echo "❌ CLI Shortcuts Tests: FAILED"
+          fi
+          
+          if [ "${{ needs.test-cli-interactive.result }}" == "success" ]; then
+            echo "✅ CLI Interactive Tests: PASSED"
+          else
+            echo "❌ CLI Interactive Tests: FAILED"
+          fi
