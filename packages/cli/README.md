@@ -1,16 +1,105 @@
-# @hexa-framework/cli
+# 🔷 Hexa Framework CLI
 
-> CLI tool for Hexa Framework - Code generation and project scaffolding
+> **Like Laravel Artisan for TypeScript** - Powerful CLI tool for Hexa Framework with code generation, database migrations, and project scaffolding
 
-## Installation
+[![npm version](https://img.shields.io/npm/v/hexa-framework-cli.svg)](https://www.npmjs.com/package/hexa-framework-cli)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+## ✨ Features
+
+- 🎨 **Make Commands** - Like Laravel Artisan (make:controller, make:service, etc.)
+- 🗄️ **Database Migrations** - Prisma-powered migration management
+- 🚀 **Dev Server** - Hot reload development server
+- 📋 **List Commands** - View routes, controllers, and middleware
+- 🏗️ **Full CRUD Generation** - Complete resource scaffolding
+- 🎯 **Smart Naming** - Automatic PascalCase, camelCase, kebab-case conversion
+
+## 📦 Installation
 
 ```bash
-npm install -g @hexa-framework/cli
+# Global installation
+npm install -g hexa-framework-cli
+
+# Or in your project
+npm install --save-dev hexa-framework-cli
 ```
 
-## Usage
+## 🚀 Quick Start
 
-### Generate Resource
+```bash
+# View all available commands
+hexa info
+
+# Create a resource controller
+hexa make:controller User --resource
+
+# Start development server
+hexa serve
+
+# Run database migrations
+hexa migrate
+
+# List all routes
+hexa route:list
+```
+
+## 📚 Usage
+
+### Make Commands (New in v1.1.0!)
+
+Create individual components like Laravel Artisan:
+
+```bash
+# Controllers
+hexa make:controller User              # Basic controller
+hexa make:controller Product -r        # Resource controller (CRUD)
+
+# Services
+hexa make:service User
+
+# Repositories
+hexa make:repository User
+
+# Entities
+hexa make:entity User
+
+# Middleware
+hexa make:middleware Auth
+
+# DTOs
+hexa make:dto CreateUser
+```
+
+### Database Commands
+
+Manage your database migrations:
+
+```bash
+hexa migrate                  # Run pending migrations
+hexa migrate --seed           # Migrate and seed
+hexa migrate:fresh            # Drop all tables and re-migrate
+hexa migrate:reset            # Reset database
+hexa migrate:status           # Check migration status
+hexa db:seed                  # Seed database
+```
+
+### Development Commands
+
+```bash
+hexa serve                    # Start dev server (port 3000)
+hexa serve --port 4000        # Custom port
+hexa build                    # Build for production
+```
+
+### List Commands
+
+```bash
+hexa route:list              # Display all routes in table
+hexa controller:list         # List all controllers
+hexa middleware:list         # List all middleware
+```
+
+### Generate Resource (All-in-One)
 
 Generate complete resource files (entity, repository, service, controller, router, validation, mapper):
 
@@ -33,12 +122,6 @@ hexa permission scan
 
 # Verify permission coverage
 hexa permission verify
-```
-
-### Info
-
-```bash
-hexa info
 ```
 
 ## What Gets Generated?
