@@ -7,6 +7,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
 [![Node](https://img.shields.io/badge/Node-%3E%3D18-green)](https://nodejs.org/)
+[![npm version](https://img.shields.io/npm/v/@hexa-framework/core.svg)](https://www.npmjs.com/package/@hexa-framework/core)
+[![GitHub](https://img.shields.io/github/stars/lutfian-rhdn/hexa-framework?style=social)](https://github.com/lutfian-rhdn/hexa-framework)
 
 ## 🎯 Apa itu Hexa Framework?
 
@@ -34,11 +36,15 @@ Framework ini lahir dari pengalaman development production-ready API dan menggun
 ### Installation
 
 ```bash
-# Install CLI globally
-npm install -g @hexa-framework/cli
-
-# Atau gunakan npx
+# Cara paling mudah - gunakan npx
 npx create-hexa-app my-api
+
+# Atau install create-hexa-app globally
+npm install -g create-hexa-app
+create-hexa-app my-api
+
+# Install CLI untuk code generation
+npm install -g @hexa-framework/cli
 ```
 
 ### Create New Project

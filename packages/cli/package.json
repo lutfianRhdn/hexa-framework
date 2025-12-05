@@ -22,6 +22,20 @@
   ],
   "author": "lutfian.rhdn",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lutfian-rhdn/hexa-framework.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/lutfian-rhdn/hexa-framework#readme",
+  "bugs": {
+    "url": "https://github.com/lutfian-rhdn/hexa-framework/issues"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
   "dependencies": {
     "commander": "^11.1.0",
     "inquirer": "^9.2.12",

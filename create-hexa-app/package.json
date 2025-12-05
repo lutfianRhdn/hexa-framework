@@ -20,6 +20,18 @@
   ],
   "author": "lutfian.rhdn",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lutfian-rhdn/hexa-framework.git",
+    "directory": "create-hexa-app"
+  },
+  "homepage": "https://github.com/lutfian-rhdn/hexa-framework#readme",
+  "bugs": {
+    "url": "https://github.com/lutfian-rhdn/hexa-framework/issues"
+  },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "commander": "^11.1.0",
     "inquirer": "^9.2.12",

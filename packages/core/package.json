@@ -22,6 +22,19 @@
   ],
   "author": "lutfian.rhdn",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lutfian-rhdn/hexa-framework.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/lutfian-rhdn/hexa-framework#readme",
+  "bugs": {
+    "url": "https://github.com/lutfian-rhdn/hexa-framework/issues"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "dependencies": {
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
