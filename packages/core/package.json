@@ -1,5 +1,5 @@
 {
-  "name": "@hexa-framework/core",
+  "name": "hexa-framework-core",
   "version": "1.0.0",
   "description": "Core package for Hexa Framework - Base classes, middleware, and utilities",
   "main": "dist/index.js",

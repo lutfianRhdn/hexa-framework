@@ -104,7 +104,7 @@ async function createBasicTemplate(projectPath: string, projectName: string) {
       'prisma:studio': 'prisma studio',
     },
     dependencies: {
-      '@hexa-framework/core': '^1.0.0',
+      'hexa-framework-core': '^1.0.0',
       '@prisma/client': '^5.7.0',
       express: '^4.18.2',
       dotenv: '^16.3.1',

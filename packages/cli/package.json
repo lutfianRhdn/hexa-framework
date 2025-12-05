@@ -1,5 +1,5 @@
 {
-  "name": "@hexa-framework/cli",
+  "name": "hexa-framework-cli",
   "version": "1.0.0",
   "description": "CLI tool for Hexa Framework - Code generation and project scaffolding",
   "main": "dist/index.js",
