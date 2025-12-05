@@ -1,6 +1,6 @@
 {
   "name": "hexa-framework-core",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Core package for Hexa Framework - Base classes, middleware, and utilities",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
