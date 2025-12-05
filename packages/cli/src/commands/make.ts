@@ -924,3 +924,659 @@ export class ${className} {
 `;
   }
 }
+
+/**
+ * Generate test file for any component
+ */
+export async function makeTest(name: string, options: { type?: string; unit?: boolean; integration?: boolean; e2e?: boolean }) {
+  const testType = options.unit ? 'unit' : options.integration ? 'integration' : options.e2e ? 'e2e' : 'spec';
+  const componentType = options.type || 'service';
+  
+  const spinner = ora(`Creating ${testType} test for ${name}`).start();
+  
+  try {
+    const className = `${toPascalCase(name)}${toPascalCase(componentType)}`;
+    const testFileName = `${className}.${testType}.ts`;
+    
+    // Determine test directory based on type
+    let testDir: string;
+    if (testType === 'unit' || testType === 'spec') {
+      testDir = path.join(process.cwd(), 'tests', 'unit', componentType + 's');
+    } else if (testType === 'integration') {
+      testDir = path.join(process.cwd(), 'tests', 'integration');
+    } else {
+      testDir = path.join(process.cwd(), 'tests', 'e2e');
+    }
+    
+    if (!fs.existsSync(testDir)) {
+      fs.mkdirSync(testDir, { recursive: true });
+    }
+    
+    const testPath = path.join(testDir, testFileName);
+    
+    if (fs.existsSync(testPath)) {
+      spinner.fail(`Test file ${testFileName} already exists`);
+      return;
+    }
+    
+    const content = generateTestFile(name, componentType, testType);
+    fs.writeFileSync(testPath, content);
+    
+    spinner.succeed(`Test created: ${chalk.green(testPath)}`);
+    console.log(chalk.gray(`\nRun tests with: ${chalk.cyan('hexa test')}`));
+  } catch (error: any) {
+    spinner.fail('Failed to create test');
+    console.error(chalk.red(error.message));
+    process.exit(1);
+  }
+}
+
+/**
+ * Generate test file content based on component type
+ */
+function generateTestFile(name: string, componentType: string, testType: string): string {
+  const className = `${toPascalCase(name)}${toPascalCase(componentType)}`;
+  const varName = toCamelCase(name) + toPascalCase(componentType);
+  
+  // Determine import path based on component type
+  let importPath = '';
+  switch (componentType) {
+    case 'controller':
+      importPath = '@/transports/controllers';
+      break;
+    case 'service':
+      importPath = '@/core/services';
+      break;
+    case 'repository':
+      importPath = '@/adapters/repositories';
+      break;
+    case 'entity':
+      importPath = '@/core/entities';
+      break;
+    case 'middleware':
+      importPath = '@/transports/middlewares';
+      break;
+    case 'adapter':
+      importPath = '@/adapters';
+      break;
+    case 'transport':
+      importPath = '@/transports';
+      break;
+    default:
+      importPath = '@/core';
+  }
+
+  if (testType === 'unit' || testType === 'spec') {
+    return generateUnitTest(className, varName, importPath, componentType);
+  } else if (testType === 'integration') {
+    return generateIntegrationTest(className, varName, importPath, componentType);
+  } else {
+    return generateE2ETest(className, varName, importPath, componentType);
+  }
+}
+
+/**
+ * Generate unit test template
+ */
+function generateUnitTest(className: string, varName: string, importPath: string, componentType: string): string {
+  if (componentType === 'service') {
+    return `import { ${className} } from '${importPath}/${className}';
+
+describe('${className}', () => {
+  let ${varName}: ${className};
+
+  beforeEach(() => {
+    // Initialize service before each test
+    ${varName} = new ${className}();
+  });
+
+  afterEach(() => {
+    // Cleanup after each test
+    jest.clearAllMocks();
+  });
+
+  describe('constructor', () => {
+    it('should create an instance', () => {
+      expect(${varName}).toBeDefined();
+      expect(${varName}).toBeInstanceOf(${className});
+    });
+  });
+
+  describe('business logic methods', () => {
+    it('should perform operation successfully', async () => {
+      // Arrange
+      const input = { /* test data */ };
+      
+      // Act
+      const result = await ${varName}.someMethod(input);
+      
+      // Assert
+      expect(result).toBeDefined();
+      // Add your assertions here
+    });
+
+    it('should handle errors gracefully', async () => {
+      // Arrange
+      const invalidInput = null;
+      
+      // Act & Assert
+      await expect(${varName}.someMethod(invalidInput)).rejects.toThrow();
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle empty input', async () => {
+      // Add edge case tests
+    });
+
+    it('should validate input data', async () => {
+      // Add validation tests
+    });
+  });
+});
+`;
+  } else if (componentType === 'repository') {
+    return `import { ${className} } from '${importPath}/${className}';
+
+describe('${className}', () => {
+  let ${varName}: ${className};
+  let mockDb: any;
+
+  beforeEach(() => {
+    // Mock database connection
+    mockDb = {
+      query: jest.fn(),
+      execute: jest.fn(),
+    };
+    
+    ${varName} = new ${className}(mockDb);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('findAll', () => {
+    it('should return all records', async () => {
+      // Arrange
+      const mockData = [{ id: 1 }, { id: 2 }];
+      mockDb.query.mockResolvedValue(mockData);
+      
+      // Act
+      const result = await ${varName}.findAll();
+      
+      // Assert
+      expect(result).toEqual(mockData);
+      expect(mockDb.query).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('findById', () => {
+    it('should return a single record by id', async () => {
+      // Arrange
+      const mockData = { id: 1, name: 'Test' };
+      mockDb.query.mockResolvedValue([mockData]);
+      
+      // Act
+      const result = await ${varName}.findById(1);
+      
+      // Assert
+      expect(result).toEqual(mockData);
+    });
+
+    it('should return null when record not found', async () => {
+      // Arrange
+      mockDb.query.mockResolvedValue([]);
+      
+      // Act
+      const result = await ${varName}.findById(999);
+      
+      // Assert
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('create', () => {
+    it('should create a new record', async () => {
+      // Arrange
+      const newData = { name: 'New Item' };
+      const mockCreated = { id: 1, ...newData };
+      mockDb.execute.mockResolvedValue({ insertId: 1 });
+      mockDb.query.mockResolvedValue([mockCreated]);
+      
+      // Act
+      const result = await ${varName}.create(newData);
+      
+      // Assert
+      expect(result).toEqual(mockCreated);
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('update', () => {
+    it('should update an existing record', async () => {
+      // Arrange
+      const updateData = { name: 'Updated' };
+      mockDb.execute.mockResolvedValue({ affectedRows: 1 });
+      
+      // Act
+      await ${varName}.update(1, updateData);
+      
+      // Assert
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete a record', async () => {
+      // Arrange
+      mockDb.execute.mockResolvedValue({ affectedRows: 1 });
+      
+      // Act
+      await ${varName}.delete(1);
+      
+      // Assert
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+`;
+  } else if (componentType === 'controller') {
+    return `import { ${className} } from '${importPath}/${className}';
+import { Request, Response } from 'express';
+
+describe('${className}', () => {
+  let ${varName}: ${className};
+  let mockRequest: Partial<Request>;
+  let mockResponse: Partial<Response>;
+  let mockService: any;
+
+  beforeEach(() => {
+    // Mock service
+    mockService = {
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    };
+
+    // Mock Express request and response
+    mockRequest = {
+      params: {},
+      body: {},
+      query: {},
+    };
+
+    mockResponse = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
+      send: jest.fn().mockReturnThis(),
+    };
+
+    ${varName} = new ${className}(mockService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('index', () => {
+    it('should return all items', async () => {
+      // Arrange
+      const mockData = [{ id: 1 }, { id: 2 }];
+      mockService.findAll.mockResolvedValue(mockData);
+
+      // Act
+      await ${varName}.index(mockRequest as Request, mockResponse as Response);
+
+      // Assert
+      expect(mockService.findAll).toHaveBeenCalledTimes(1);
+      expect(mockResponse.json).toHaveBeenCalledWith(mockData);
+    });
+  });
+
+  describe('show', () => {
+    it('should return a single item', async () => {
+      // Arrange
+      mockRequest.params = { id: '1' };
+      const mockData = { id: 1, name: 'Test' };
+      mockService.findById.mockResolvedValue(mockData);
+
+      // Act
+      await ${varName}.show(mockRequest as Request, mockResponse as Response);
+
+      // Assert
+      expect(mockService.findById).toHaveBeenCalledWith(1);
+      expect(mockResponse.json).toHaveBeenCalledWith(mockData);
+    });
+
+    it('should return 404 when item not found', async () => {
+      // Arrange
+      mockRequest.params = { id: '999' };
+      mockService.findById.mockResolvedValue(null);
+
+      // Act
+      await ${varName}.show(mockRequest as Request, mockResponse as Response);
+
+      // Assert
+      expect(mockResponse.status).toHaveBeenCalledWith(404);
+    });
+  });
+
+  describe('store', () => {
+    it('should create a new item', async () => {
+      // Arrange
+      const newData = { name: 'New Item' };
+      mockRequest.body = newData;
+      const mockCreated = { id: 1, ...newData };
+      mockService.create.mockResolvedValue(mockCreated);
+
+      // Act
+      await ${varName}.store(mockRequest as Request, mockResponse as Response);
+
+      // Assert
+      expect(mockService.create).toHaveBeenCalledWith(newData);
+      expect(mockResponse.status).toHaveBeenCalledWith(201);
+      expect(mockResponse.json).toHaveBeenCalledWith(mockCreated);
+    });
+  });
+
+  describe('update', () => {
+    it('should update an existing item', async () => {
+      // Arrange
+      mockRequest.params = { id: '1' };
+      mockRequest.body = { name: 'Updated' };
+      const mockUpdated = { id: 1, name: 'Updated' };
+      mockService.update.mockResolvedValue(mockUpdated);
+
+      // Act
+      await ${varName}.update(mockRequest as Request, mockResponse as Response);
+
+      // Assert
+      expect(mockService.update).toHaveBeenCalledWith(1, { name: 'Updated' });
+      expect(mockResponse.json).toHaveBeenCalledWith(mockUpdated);
+    });
+  });
+
+  describe('destroy', () => {
+    it('should delete an item', async () => {
+      // Arrange
+      mockRequest.params = { id: '1' };
+      mockService.delete.mockResolvedValue(true);
+
+      // Act
+      await ${varName}.destroy(mockRequest as Request, mockResponse as Response);
+
+      // Assert
+      expect(mockService.delete).toHaveBeenCalledWith(1);
+      expect(mockResponse.status).toHaveBeenCalledWith(204);
+    });
+  });
+});
+`;
+  } else {
+    // Generic test template
+    return `import { ${className} } from '${importPath}/${className}';
+
+describe('${className}', () => {
+  let instance: ${className};
+
+  beforeEach(() => {
+    instance = new ${className}();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('initialization', () => {
+    it('should create an instance', () => {
+      expect(instance).toBeDefined();
+      expect(instance).toBeInstanceOf(${className});
+    });
+  });
+
+  describe('methods', () => {
+    it('should perform operation successfully', async () => {
+      // Arrange
+      const input = { /* test data */ };
+      
+      // Act
+      // const result = await instance.someMethod(input);
+      
+      // Assert
+      // expect(result).toBeDefined();
+      // Add your assertions here
+    });
+  });
+});
+`;
+  }
+}
+
+/**
+ * Generate integration test template
+ */
+function generateIntegrationTest(className: string, varName: string, importPath: string, componentType: string): string {
+  return `import { ${className} } from '${importPath}/${className}';
+
+/**
+ * Integration tests for ${className}
+ * Tests interactions between multiple components
+ */
+describe('${className} Integration Tests', () => {
+  let ${varName}: ${className};
+
+  beforeAll(async () => {
+    // Setup test database, connections, etc.
+    // await setupTestEnvironment();
+  });
+
+  afterAll(async () => {
+    // Cleanup test environment
+    // await teardownTestEnvironment();
+  });
+
+  beforeEach(() => {
+    ${varName} = new ${className}();
+  });
+
+  describe('end-to-end workflow', () => {
+    it('should handle complete operation flow', async () => {
+      // Arrange
+      const testData = { /* integration test data */ };
+      
+      // Act
+      // Perform multi-step operations
+      // const result = await ${varName}.complexOperation(testData);
+      
+      // Assert
+      // Verify the complete flow
+      // expect(result).toBeDefined();
+    });
+  });
+
+  describe('database interactions', () => {
+    it('should persist and retrieve data correctly', async () => {
+      // Test actual database operations
+    });
+
+    it('should handle transactions properly', async () => {
+      // Test transaction rollback/commit
+    });
+  });
+
+  describe('external dependencies', () => {
+    it('should interact with external services', async () => {
+      // Test API calls, message queues, etc.
+    });
+  });
+
+  describe('error scenarios', () => {
+    it('should handle database connection failures', async () => {
+      // Test resilience
+    });
+
+    it('should recover from timeout errors', async () => {
+      // Test error recovery
+    });
+  });
+});
+`;
+}
+
+/**
+ * Generate E2E test template
+ */
+function generateE2ETest(className: string, varName: string, importPath: string, componentType: string): string {
+  return `import request from 'supertest';
+import { app } from '@/index';
+
+/**
+ * End-to-End tests for ${className}
+ * Tests the complete application flow from HTTP request to response
+ */
+describe('${className} E2E Tests', () => {
+  beforeAll(async () => {
+    // Setup test server and database
+    // await app.initialize();
+  });
+
+  afterAll(async () => {
+    // Cleanup and close connections
+    // await app.close();
+  });
+
+  describe('GET endpoints', () => {
+    it('should retrieve all items', async () => {
+      const response = await request(app)
+        .get('/api/items')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(response.body).toBeDefined();
+      expect(Array.isArray(response.body)).toBe(true);
+    });
+
+    it('should retrieve a single item by id', async () => {
+      const response = await request(app)
+        .get('/api/items/1')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(response.body).toBeDefined();
+      expect(response.body.id).toBe(1);
+    });
+
+    it('should return 404 for non-existent item', async () => {
+      await request(app)
+        .get('/api/items/99999')
+        .expect(404);
+    });
+  });
+
+  describe('POST endpoints', () => {
+    it('should create a new item', async () => {
+      const newItem = {
+        name: 'Test Item',
+        description: 'Test Description'
+      };
+
+      const response = await request(app)
+        .post('/api/items')
+        .send(newItem)
+        .expect('Content-Type', /json/)
+        .expect(201);
+
+      expect(response.body).toBeDefined();
+      expect(response.body.name).toBe(newItem.name);
+      expect(response.body.id).toBeDefined();
+    });
+
+    it('should validate required fields', async () => {
+      const invalidItem = {};
+
+      await request(app)
+        .post('/api/items')
+        .send(invalidItem)
+        .expect(400);
+    });
+  });
+
+  describe('PUT endpoints', () => {
+    it('should update an existing item', async () => {
+      const updateData = {
+        name: 'Updated Name'
+      };
+
+      const response = await request(app)
+        .put('/api/items/1')
+        .send(updateData)
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(response.body.name).toBe(updateData.name);
+    });
+
+    it('should return 404 for non-existent item', async () => {
+      await request(app)
+        .put('/api/items/99999')
+        .send({ name: 'Test' })
+        .expect(404);
+    });
+  });
+
+  describe('DELETE endpoints', () => {
+    it('should delete an item', async () => {
+      await request(app)
+        .delete('/api/items/1')
+        .expect(204);
+
+      // Verify deletion
+      await request(app)
+        .get('/api/items/1')
+        .expect(404);
+    });
+  });
+
+  describe('authentication and authorization', () => {
+    it('should require authentication', async () => {
+      await request(app)
+        .post('/api/items')
+        .send({ name: 'Test' })
+        .expect(401);
+    });
+
+    it('should allow access with valid token', async () => {
+      const token = 'valid-test-token';
+
+      await request(app)
+        .post('/api/items')
+        .set('Authorization', \`Bearer \${token}\`)
+        .send({ name: 'Test' })
+        .expect(201);
+    });
+  });
+
+  describe('error handling', () => {
+    it('should handle server errors gracefully', async () => {
+      // Trigger a server error condition
+      await request(app)
+        .get('/api/items/error')
+        .expect(500);
+    });
+
+    it('should return proper error messages', async () => {
+      const response = await request(app)
+        .post('/api/items')
+        .send({ invalid: 'data' })
+        .expect(400);
+
+      expect(response.body.error).toBeDefined();
+      expect(response.body.message).toBeDefined();
+    });
+  });
+});
+`;
+}

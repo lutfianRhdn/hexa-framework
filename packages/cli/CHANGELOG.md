@@ -2,6 +2,91 @@
 
 All notable changes to the Hexa Framework CLI will be documented in this file.
 
+## [1.3.0] - 2024-12-05
+
+### 🧪 Added - Testing Commands & Test Generation
+
+This release adds comprehensive testing support with Jest/Vitest integration and test file generation.
+
+### Added
+
+#### Test Commands (New!)
+- **test** - Run all tests with coverage and watch options
+  - `hexa test` - Run all tests
+  - `hexa test --watch` - Run tests in watch mode
+  - `hexa test --coverage` - Generate code coverage report
+  - `hexa test --verbose` - Display individual test results
+  - `hexa test --filter <pattern>` - Run tests matching pattern
+
+- **test:unit** - Run unit tests only
+  - `hexa test:unit` - Run all unit tests
+  - `hexa test:unit --watch` - Watch mode for unit tests
+  - `hexa test:unit --coverage` - Unit test coverage
+
+- **test:integration** - Run integration tests only
+  - `hexa test:integration` - Run all integration tests
+  - `hexa test:integration --watch` - Watch mode for integration tests
+  - `hexa test:integration --coverage` - Integration test coverage
+
+- **test:e2e** - Run end-to-end tests only
+  - `hexa test:e2e` - Run all E2E tests
+  - `hexa test:e2e --watch` - Watch mode for E2E tests
+  - `hexa test:e2e --coverage` - E2E test coverage
+
+#### Make Test Command (New!)
+- **make:test** - Generate test files for components
+  - `hexa make:test <name>` - Generate test for service (default)
+  - `hexa make:test <name> --type controller` - Generate controller test
+  - `hexa make:test <name> --type service` - Generate service test
+  - `hexa make:test <name> --type repository` - Generate repository test
+  - `hexa make:test <name> --unit` - Generate unit test
+  - `hexa make:test <name> --integration` - Generate integration test
+  - `hexa make:test <name> --e2e` - Generate E2E test
+
+### Features
+
+#### Automatic Test Framework Setup
+- Automatically detects and installs Jest if not present
+- Creates `jest.config.js` with optimal TypeScript configuration
+- Support for both Jest and Vitest test frameworks
+- Configures test paths, coverage, and module mapping
+
+#### Test Templates
+1. **Unit Tests** - Isolated component testing
+   - Service tests with business logic validation
+   - Repository tests with database mocking
+   - Controller tests with request/response mocking
+   - Entity and DTO tests
+   - Complete arrange-act-assert pattern
+
+2. **Integration Tests** - Multi-component testing
+   - End-to-end workflow testing
+   - Database interaction testing
+   - Transaction handling
+   - External service integration
+   - Error recovery scenarios
+
+3. **E2E Tests** - Full application testing
+   - HTTP endpoint testing with supertest
+   - Authentication and authorization flows
+   - CRUD operations validation
+   - Error handling verification
+   - Real API request/response testing
+
+### Enhanced
+- Updated CLI version to 1.3.0
+- Added testing section to help command
+- Improved command organization
+- Better test discovery patterns
+- Coverage reporting with text, lcov, and HTML formats
+
+### Templates Included
+- Comprehensive test templates for all component types
+- Mock setup and teardown examples
+- Best practices for test structure
+- Proper TypeScript type definitions
+- Jest matchers and assertions
+
 ## [1.2.0] - 2024-12-05
 
 ### 🎉 Added - Adapter & Transport Layer Generation

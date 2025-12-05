@@ -8,14 +8,15 @@ import { verifyPermissions } from './commands/verify';
 import { migrate, migrateFresh, migrateReset, migrateRollback, migrateStatus, seed } from './commands/migrate';
 import { serve, build } from './commands/serve';
 import { routeList, controllerList, middlewareList } from './commands/list';
-import { makeController, makeService, makeRepository, makeEntity, makeMiddleware, makeDto, makeAdapter, makeTransport } from './commands/make';
+import { makeController, makeService, makeRepository, makeEntity, makeMiddleware, makeDto, makeAdapter, makeTransport, makeTest } from './commands/make';
+import { runTests, runUnitTests, runIntegrationTests, runE2ETests } from './commands/test';
 
 const program = new Command();
 
 program
   .name('hexa')
   .description('🔷 Hexa Framework CLI - Like Laravel Artisan for TypeScript')
-  .version('1.2.0');
+  .version('1.3.0');
 
 // Generate command
 program
@@ -128,6 +129,84 @@ program
   .action(async (name, options) => {
     try {
       await makeTransport(name, options);
+    } catch (error) {
+      console.error(chalk.red('Error:'), error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('make:test <name>')
+  .description('Create a new test file')
+  .option('-t, --type <type>', 'Component type (service, controller, repository, entity, etc.)', 'service')
+  .option('-u, --unit', 'Generate unit test')
+  .option('-i, --integration', 'Generate integration test')
+  .option('-e, --e2e', 'Generate E2E test')
+  .action(async (name, options) => {
+    try {
+      await makeTest(name, options);
+    } catch (error) {
+      console.error(chalk.red('Error:'), error);
+      process.exit(1);
+    }
+  });
+
+// Test Commands
+program
+  .command('test')
+  .description('Run all tests')
+  .option('-w, --watch', 'Run tests in watch mode')
+  .option('-c, --coverage', 'Generate code coverage report')
+  .option('-v, --verbose', 'Display individual test results')
+  .option('-f, --filter <pattern>', 'Run tests matching the pattern')
+  .action(async (options) => {
+    try {
+      await runTests(options);
+    } catch (error) {
+      console.error(chalk.red('Error:'), error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('test:unit')
+  .description('Run unit tests only')
+  .option('-w, --watch', 'Run tests in watch mode')
+  .option('-c, --coverage', 'Generate code coverage report')
+  .option('-v, --verbose', 'Display individual test results')
+  .action(async (options) => {
+    try {
+      await runUnitTests(options);
+    } catch (error) {
+      console.error(chalk.red('Error:'), error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('test:integration')
+  .description('Run integration tests only')
+  .option('-w, --watch', 'Run tests in watch mode')
+  .option('-c, --coverage', 'Generate code coverage report')
+  .option('-v, --verbose', 'Display individual test results')
+  .action(async (options) => {
+    try {
+      await runIntegrationTests(options);
+    } catch (error) {
+      console.error(chalk.red('Error:'), error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('test:e2e')
+  .description('Run end-to-end tests only')
+  .option('-w, --watch', 'Run tests in watch mode')
+  .option('-c, --coverage', 'Generate code coverage report')
+  .option('-v, --verbose', 'Display individual test results')
+  .action(async (options) => {
+    try {
+      await runE2ETests(options);
     } catch (error) {
       console.error(chalk.red('Error:'), error);
       process.exit(1);
@@ -322,7 +401,7 @@ program
     console.log(chalk.gray('Hexagonal Architecture TypeScript Framework'));
     console.log(chalk.gray('Like Laravel Artisan for TypeScript'));
     console.log(chalk.gray('by lutfian.rhdn\n'));
-    console.log(chalk.white('Version:'), '1.2.0');
+    console.log(chalk.white('Version:'), '1.3.0');
     console.log(chalk.white('License:'), 'MIT\n');
     console.log(chalk.white.bold('Available Commands:\n'));
     console.log(chalk.green('Generation:'));
@@ -337,7 +416,13 @@ program
     console.log('  hexa make:middleware <name>   - Create a new middleware');
     console.log('  hexa make:dto <name>          - Create a new DTO');
     console.log('  hexa make:adapter <name>      - Create a new adapter (database, cache, etc.)');
-    console.log('  hexa make:transport <name>    - Create a new transport (http, graphql, etc.)\n');
+    console.log('  hexa make:transport <name>    - Create a new transport (http, graphql, etc.)');
+    console.log('  hexa make:test <name>         - Create a new test file\n');
+    console.log(chalk.green('Testing:'));
+    console.log('  hexa test                  - Run all tests');
+    console.log('  hexa test:unit             - Run unit tests');
+    console.log('  hexa test:integration      - Run integration tests');
+    console.log('  hexa test:e2e              - Run E2E tests\n');
     console.log(chalk.green('Database:'));
     console.log('  hexa migrate               - Run database migrations');
     console.log('  hexa migrate:fresh         - Drop all tables and re-migrate');
