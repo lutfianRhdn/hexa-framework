@@ -436,6 +436,614 @@ validateConfig();
 `;
 
   fs.writeFileSync(path.join(srcPath, 'configs', 'env.ts'), envConfig);
+
+  // Create example User entity
+  const userEntity = `export interface User {
+  id: number;
+  email: string;
+  username: string;
+  password: string;
+  role: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+}
+
+export type CreateUserDTO = Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
+export type UpdateUserDTO = Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>;
+export type UserResponse = Omit<User, 'password'>;
+`;
+
+  fs.writeFileSync(
+    path.join(srcPath, 'core', 'entities', 'User.ts'),
+    userEntity
+  );
+
+  // Create repository interface
+  const userRepoInterface = `import { BaseRepository } from 'hexa-framework-core';
+import { User, CreateUserDTO, UpdateUserDTO } from '../entities/User';
+
+export interface IUserRepository extends BaseRepository<User> {
+  findByEmail(email: string): Promise<User | null>;
+  findByUsername(username: string): Promise<User | null>;
+  softDelete(id: number): Promise<void>;
+}
+`;
+
+  fs.writeFileSync(
+    path.join(srcPath, 'core', 'repositories', 'IUserRepository.ts'),
+    userRepoInterface
+  );
+
+  // Create Postgres repository implementation
+  const postgresUserRepo = `import { IUserRepository } from '../../../core/repositories/IUserRepository';
+import { User, CreateUserDTO, UpdateUserDTO } from '../../../core/entities/User';
+import { prisma } from '../../../configs/database';
+
+export class PostgresUserRepository implements IUserRepository {
+  async findById(id: number): Promise<User | null> {
+    const user = await prisma.user.findUnique({
+      where: { id, deletedAt: null }
+    });
+    return user as User | null;
+  }
+
+  async findAll(options?: {
+    skip?: number;
+    take?: number;
+    where?: any;
+  }): Promise<User[]> {
+    const users = await prisma.user.findMany({
+      where: { ...options?.where, deletedAt: null },
+      skip: options?.skip,
+      take: options?.take,
+      orderBy: { createdAt: 'desc' }
+    });
+    return users as User[];
+  }
+
+  async count(where?: any): Promise<number> {
+    return await prisma.user.count({
+      where: { ...where, deletedAt: null }
+    });
+  }
+
+  async create(data: CreateUserDTO): Promise<User> {
+    const user = await prisma.user.create({
+      data: data as any
+    });
+    return user as User;
+  }
+
+  async update(id: number, data: UpdateUserDTO): Promise<User> {
+    const user = await prisma.user.update({
+      where: { id },
+      data: data as any
+    });
+    return user as User;
+  }
+
+  async delete(id: number): Promise<void> {
+    await prisma.user.delete({
+      where: { id }
+    });
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    const user = await prisma.user.findUnique({
+      where: { email, deletedAt: null }
+    });
+    return user as User | null;
+  }
+
+  async findByUsername(username: string): Promise<User | null> {
+    const user = await prisma.user.findUnique({
+      where: { username, deletedAt: null }
+    });
+    return user as User | null;
+  }
+
+  async softDelete(id: number): Promise<void> {
+    await prisma.user.update({
+      where: { id },
+      data: { deletedAt: new Date() }
+    });
+  }
+}
+`;
+
+  fs.writeFileSync(
+    path.join(srcPath, 'adapters', 'postgres', 'repositories', 'PostgresUserRepository.ts'),
+    postgresUserRepo
+  );
+
+  // Create User service
+  const userService = `import { BaseService } from 'hexa-framework-core';
+import { IUserRepository } from '../repositories/IUserRepository';
+import { User, CreateUserDTO, UpdateUserDTO, UserResponse } from '../entities/User';
+import bcrypt from 'bcrypt';
+
+export class UserService extends BaseService<User> {
+  constructor(private userRepository: IUserRepository) {
+    super(userRepository);
+  }
+
+  async createUser(data: CreateUserDTO): Promise<UserResponse> {
+    // Check if email already exists
+    const existingEmail = await this.userRepository.findByEmail(data.email);
+    if (existingEmail) {
+      throw new Error('Email already exists');
+    }
+
+    // Check if username already exists
+    const existingUsername = await this.userRepository.findByUsername(data.username);
+    if (existingUsername) {
+      throw new Error('Username already exists');
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    // Create user
+    const user = await this.userRepository.create({
+      ...data,
+      password: hashedPassword
+    });
+
+    // Remove password from response
+    const { password, ...userResponse } = user;
+    return userResponse as UserResponse;
+  }
+
+  async updateUser(id: number, data: UpdateUserDTO): Promise<UserResponse> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // If updating password, hash it
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+
+    // If updating email, check uniqueness
+    if (data.email && data.email !== user.email) {
+      const existingEmail = await this.userRepository.findByEmail(data.email);
+      if (existingEmail) {
+        throw new Error('Email already exists');
+      }
+    }
+
+    // If updating username, check uniqueness
+    if (data.username && data.username !== user.username) {
+      const existingUsername = await this.userRepository.findByUsername(data.username);
+      if (existingUsername) {
+        throw new Error('Username already exists');
+      }
+    }
+
+    const updatedUser = await this.userRepository.update(id, data);
+    const { password, ...userResponse } = updatedUser;
+    return userResponse as UserResponse;
+  }
+
+  async getUserById(id: number): Promise<UserResponse> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const { password, ...userResponse } = user;
+    return userResponse as UserResponse;
+  }
+
+  async getAllUsers(page = 1, limit = 10): Promise<{ data: UserResponse[]; total: number; page: number; limit: number }> {
+    const skip = (page - 1) * limit;
+    const [users, total] = await Promise.all([
+      this.userRepository.findAll({ skip, take: limit }),
+      this.userRepository.count()
+    ]);
+
+    const usersResponse = users.map(({ password, ...user }) => user as UserResponse);
+
+    return {
+      data: usersResponse,
+      total,
+      page,
+      limit
+    };
+  }
+
+  async deleteUser(id: number): Promise<void> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    await this.userRepository.softDelete(id);
+  }
+}
+`;
+
+  fs.writeFileSync(
+    path.join(srcPath, 'core', 'services', 'UserService.ts'),
+    userService
+  );
+
+  // Create User controller
+  const userController = `import { BaseController } from 'hexa-framework-core';
+import { Request, Response } from 'express';
+import { UserService } from '../../../core/services/UserService';
+import { createUserSchema, updateUserSchema } from '../validations/userValidation';
+import { userResponseMapper } from '../../../mappers/response/userMapper';
+
+export class UserController extends BaseController {
+  constructor(private userService: UserService) {
+    super();
+  }
+
+  createUser = this.asyncHandler(async (req: Request, res: Response) => {
+    const validatedData = createUserSchema.parse(req.body);
+    const user = await this.userService.createUser(validatedData);
+    const response = userResponseMapper(user);
+
+    return res.status(201).json({
+      success: true,
+      message: 'User created successfully',
+      data: response
+    });
+  });
+
+  getUser = this.asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    const user = await this.userService.getUserById(id);
+    const response = userResponseMapper(user);
+
+    return res.json({
+      success: true,
+      data: response
+    });
+  });
+
+  getAllUsers = this.asyncHandler(async (req: Request, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const result = await this.userService.getAllUsers(page, limit);
+
+    return res.json({
+      success: true,
+      data: result.data.map(userResponseMapper),
+      meta: {
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        totalPages: Math.ceil(result.total / result.limit)
+      }
+    });
+  });
+
+  updateUser = this.asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    const validatedData = updateUserSchema.parse(req.body);
+    const user = await this.userService.updateUser(id, validatedData);
+    const response = userResponseMapper(user);
+
+    return res.json({
+      success: true,
+      message: 'User updated successfully',
+      data: response
+    });
+  });
+
+  deleteUser = this.asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    await this.userService.deleteUser(id);
+
+    return res.json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+  });
+}
+`;
+
+  fs.writeFileSync(
+    path.join(srcPath, 'transports', 'api', 'controllers', 'UserController.ts'),
+    userController
+  );
+
+  // Create validation schema
+  const userValidation = `import { z } from 'zod';
+
+export const createUserSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  username: z.string().min(3, 'Username must be at least 3 characters').max(50),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  role: z.enum(['user', 'admin']).default('user'),
+  isActive: z.boolean().default(true)
+});
+
+export const updateUserSchema = z.object({
+  email: z.string().email('Invalid email format').optional(),
+  username: z.string().min(3).max(50).optional(),
+  password: z.string().min(6).optional(),
+  role: z.enum(['user', 'admin']).optional(),
+  isActive: z.boolean().optional()
+}).refine(data => Object.keys(data).length > 0, {
+  message: 'At least one field must be provided'
+});
+
+export type CreateUserInput = z.infer<typeof createUserSchema>;
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+`;
+
+  fs.writeFileSync(
+    path.join(srcPath, 'transports', 'api', 'validations', 'userValidation.ts'),
+    userValidation
+  );
+
+  // Create response mapper
+  const userMapper = `import { UserResponse } from '../../core/entities/User';
+
+export function userResponseMapper(user: UserResponse) {
+  return {
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    role: user.role,
+    isActive: user.isActive,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt
+  };
+}
+`;
+
+  fs.writeFileSync(
+    path.join(srcPath, 'mappers', 'response', 'userMapper.ts'),
+    userMapper
+  );
+
+  // Create user router
+  const userRouter = `import { Router } from 'express';
+import { UserController } from '../../controllers/UserController';
+import { UserService } from '../../../../core/services/UserService';
+import { PostgresUserRepository } from '../../../../adapters/postgres/repositories/PostgresUserRepository';
+
+const router = Router();
+
+// Initialize dependencies
+const userRepository = new PostgresUserRepository();
+const userService = new UserService(userRepository);
+const userController = new UserController(userService);
+
+/**
+ * @route   POST /api/v1/users
+ * @desc    Create a new user
+ * @access  Public
+ */
+router.post('/', userController.createUser);
+
+/**
+ * @route   GET /api/v1/users
+ * @desc    Get all users with pagination
+ * @access  Public
+ */
+router.get('/', userController.getAllUsers);
+
+/**
+ * @route   GET /api/v1/users/:id
+ * @desc    Get user by ID
+ * @access  Public
+ */
+router.get('/:id', userController.getUser);
+
+/**
+ * @route   PUT /api/v1/users/:id
+ * @desc    Update user
+ * @access  Public
+ */
+router.put('/:id', userController.updateUser);
+
+/**
+ * @route   DELETE /api/v1/users/:id
+ * @desc    Delete user (soft delete)
+ * @access  Public
+ */
+router.delete('/:id', userController.deleteUser);
+
+export default router;
+`;
+
+  fs.writeFileSync(
+    path.join(srcPath, 'transports', 'api', 'routers', 'v1', 'userRouter.ts'),
+    userRouter
+  );
+
+  // Create policy example
+  const userPolicy = `import { Request, Response, NextFunction } from 'express';
+
+/**
+ * Example policy/middleware for user authorization
+ * This is a placeholder - implement your actual authentication logic
+ */
+
+export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+  // TODO: Implement actual authentication check
+  // Example: Check JWT token, session, etc.
+  
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: 'Authentication required'
+    });
+  }
+
+  // TODO: Verify token and attach user to request
+  // req.user = decodedUser;
+  
+  next();
+};
+
+export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+  // TODO: Check if user is admin
+  // if (req.user?.role !== 'admin') {
+  //   return res.status(403).json({
+  //     success: false,
+  //     message: 'Admin access required'
+  //   });
+  // }
+  
+  next();
+};
+`;
+
+  fs.writeFileSync(
+    path.join(srcPath, 'policies', 'authPolicy.ts'),
+    userPolicy
+  );
+
+  // Update Prisma schema to uncomment User model
+  const updatedPrismaSchema = `// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Example User model
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  username  String    @unique
+  password  String
+  role      String    @default("user")
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("users")
+}
+`;
+
+  fs.writeFileSync(path.join(prismaPath, 'schema.prisma'), updatedPrismaSchema);
+
+  // Update index.ts to include user routes
+  const updatedIndexTs = `import 'dotenv/config';
+import express, { Application, Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import compression from 'compression';
+import { config } from './configs/env';
+import userRouter from './transports/api/routers/v1/userRouter';
+
+const app: Application = express();
+
+// Security middleware
+app.use(helmet());
+app.use(cors({
+  origin: config.cors.origins,
+  credentials: true
+}));
+
+// Body parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Compression middleware
+app.use(compression());
+
+// Logging middleware
+if (config.app.env === 'development') {
+  app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined'));
+}
+
+// Health check endpoint
+app.get('/health', (req: Request, res: Response) => {
+  res.json({
+    success: true,
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// API Routes
+app.use('/api/v1/users', userRouter);
+
+// 404 handler
+app.use((req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
+
+// Global error handler
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error('Error:', err);
+
+  // Zod validation errors
+  if (err.name === 'ZodError') {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation error',
+      errors: (err as any).errors
+    });
+  }
+
+  res.status(500).json({
+    success: false,
+    message: config.app.env === 'development' ? err.message : 'Internal server error',
+    ...(config.app.env === 'development' && { stack: err.stack })
+  });
+});
+
+// Start server
+const PORT = config.app.port;
+app.listen(PORT, () => {
+  console.log(\`🚀 Server running on \${config.app.url}\`);
+  console.log(\`📝 Environment: \${config.app.env}\`);
+});
+
+export default app;
+`;
+
+  fs.writeFileSync(path.join(srcPath, 'index.ts'), updatedIndexTs);
+
+  // Update package.json to include bcrypt
+  const packageJsonPath = path.join(projectPath, 'package.json');
+  const existingPackageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+  existingPackageJson.dependencies.bcrypt = '^5.1.1';
+  existingPackageJson.devDependencies['@types/bcrypt'] = '^5.0.2';
+  fs.writeFileSync(packageJsonPath, JSON.stringify(existingPackageJson, null, 2));
+
+  console.log('✅ Example files created successfully!');
+  console.log('\nExample structure:');
+  console.log('  - User Entity');
+  console.log('  - User Repository (Interface + Postgres Implementation)');
+  console.log('  - User Service (with business logic)');
+  console.log('  - User Controller (REST API handlers)');
+  console.log('  - User Router (API routes)');
+  console.log('  - User Validation (Zod schemas)');
+  console.log('  - User Mapper (Response transformation)');
+  console.log('  - Auth Policy (Example middleware)');
+  console.log('  - Database & Environment configs');
+  console.log('\nTo get started:');
+  console.log('  1. Configure your .env file with DATABASE_URL and JWT_SECRET');
+  console.log('  2. Run: npm install');
+  console.log('  3. Run: npx prisma generate');
+  console.log('  4. Run: npx prisma migrate dev --name init');
+  console.log('  5. Run: npm run dev');
 }
 
 program.parse();
