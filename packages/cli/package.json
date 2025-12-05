@@ -1,0 +1,39 @@
+{
+  "name": "@hexa-framework/cli",
+  "version": "1.0.0",
+  "description": "CLI tool for Hexa Framework - Code generation and project scaffolding",
+  "main": "dist/index.js",
+  "bin": {
+    "hexa": "./bin/hexa.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "watch": "tsc --watch",
+    "test": "jest"
+  },
+  "keywords": [
+    "hexa-framework",
+    "cli",
+    "code-generation",
+    "scaffolding",
+    "typescript"
+  ],
+  "author": "lutfian.rhdn",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "inquirer": "^9.2.12",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.10.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.3.0"
+  }
+}
