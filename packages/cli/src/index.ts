@@ -16,7 +16,33 @@ const program = new Command();
 program
   .name('hexa')
   .description('🔷 Hexa Framework CLI - Like Laravel Artisan for TypeScript')
-  .version('1.3.0');
+  .version('2.1.0');
+
+// New project command - runs create-hexa-framework-app
+program
+  .command('new [project-name]')
+  .alias('create')
+  .description('Create a new Hexa Framework project')
+  .option('-t, --template <type>', 'Project template: empty, basic-auth, or full-auth')
+  .option('-a, --adapters <types>', 'Adapters (comma-separated): prisma, typeorm, mongoose, redis, midtrans')
+  .option('-r, --transports <types>', 'Transports (comma-separated): rest, graphql, websocket')
+  .option('-y, --yes', 'Skip confirmation prompt')
+  .action(async (projectName, options) => {
+    const { execSync } = await import('child_process');
+    try {
+      let cmd = 'npx create-hexa-framework-app@latest';
+      if (projectName) cmd += ` ${projectName}`;
+      if (options.template) cmd += ` -t ${options.template}`;
+      if (options.adapters) cmd += ` -a ${options.adapters}`;
+      if (options.transports) cmd += ` -r ${options.transports}`;
+      if (options.yes) cmd += ' -y';
+
+      execSync(cmd, { stdio: 'inherit' });
+    } catch (error) {
+      console.error(chalk.red('Error creating project:'), error);
+      process.exit(1);
+    }
+  });
 
 // Generate command
 program

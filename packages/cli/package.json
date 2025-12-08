@@ -1,6 +1,6 @@
 {
   "name": "@hexa-framework/cli",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "CLI tool for Hexa Framework - Code generation and project scaffolding with Laravel Artisan-like commands",
   "main": "dist/index.js",
   "bin": {
