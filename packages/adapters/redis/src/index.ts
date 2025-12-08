@@ -5,7 +5,7 @@
  */
 
 import { createClient, RedisClientType, RedisClientOptions } from 'redis';
-import { ICache, IDatabaseAdapter, DatabaseAdapterConfig } from '@hexa/common';
+import { ICache, IDatabaseAdapter, DatabaseAdapterConfig } from '@hexa-framework/common';
 
 // ============================================
 // Redis Adapter Config

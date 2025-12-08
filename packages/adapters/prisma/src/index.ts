@@ -15,7 +15,7 @@ import {
     SearchConfig,
     FilterObject,
     OrderByConfig,
-} from '@hexa/common';
+} from '@hexa-framework/common';
 
 // ============================================
 // Prisma Adapter

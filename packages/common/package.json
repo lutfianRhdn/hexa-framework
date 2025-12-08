@@ -1,5 +1,5 @@
 {
-    "name": "@hexa/common",
+    "name": "@hexa-framework/common",
     "version": "1.0.0",
     "description": "Shared interfaces and types for Hexa Framework ecosystem",
     "main": "dist/index.js",
@@ -12,6 +12,7 @@
     },
     "keywords": [
         "hexa",
+        "hexa-framework",
         "hexagonal-architecture",
         "typescript",
         "interfaces",

@@ -5,7 +5,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { IPlugin, PluginConfig, PluginMetadata, RateLimitOptions } from '@hexa/common';
+import { IPlugin, PluginConfig, PluginMetadata, RateLimitOptions } from '@hexa-framework/common';
 
 // ============================================
 // Types

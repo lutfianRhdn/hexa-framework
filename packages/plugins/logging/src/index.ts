@@ -6,7 +6,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
-import { IPlugin, PluginConfig, PluginMetadata, ILogger, LogLevel } from '@hexa/common';
+import { IPlugin, PluginConfig, PluginMetadata, ILogger, LogLevel } from '@hexa-framework/common';
 
 // ============================================
 // Types

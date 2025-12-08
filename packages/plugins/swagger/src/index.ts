@@ -6,7 +6,7 @@
  * TODO: Full implementation coming soon
  */
 
-import { IPlugin, PluginConfig, PluginMetadata } from '@hexa/common';
+import { IPlugin, PluginConfig, PluginMetadata } from '@hexa-framework/common';
 
 export interface SwaggerPluginConfig extends PluginConfig {
     title?: string;

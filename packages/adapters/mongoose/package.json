@@ -1,5 +1,5 @@
 {
-    "name": "@hexa/adapter-mongoose",
+    "name": "@hexa-framework/adapter-mongoose",
     "version": "1.0.0",
     "description": "Mongoose database adapter for Hexa Framework (MongoDB)",
     "main": "dist/index.js",
@@ -11,6 +11,7 @@
     },
     "keywords": [
         "hexa",
+        "hexa-framework",
         "mongoose",
         "mongodb",
         "adapter",
@@ -28,11 +29,11 @@
         "README.md"
     ],
     "peerDependencies": {
-        "@hexa/common": "^1.0.0",
+        "@hexa-framework/common": "^1.0.0",
         "mongoose": "^8.0.0"
     },
     "devDependencies": {
-        "@hexa/common": "^1.0.0",
+        "@hexa-framework/common": "^1.0.0",
         "@types/node": "^20.10.0",
         "mongoose": "^8.0.3",
         "rimraf": "^5.0.5",

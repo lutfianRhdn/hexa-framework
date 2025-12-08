@@ -7,7 +7,7 @@
  */
 
 import { ApolloServer, BaseContext } from '@apollo/server';
-import { ITransport, TransportOptions } from '@hexa/common';
+import { ITransport, TransportOptions } from '@hexa-framework/common';
 
 // ============================================
 // GraphQL Transport (Placeholder)

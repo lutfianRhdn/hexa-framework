@@ -1,5 +1,5 @@
 {
-    "name": "@hexa/adapter-redis",
+    "name": "@hexa-framework/adapter-redis",
     "version": "1.0.0",
     "description": "Redis cache adapter for Hexa Framework",
     "main": "dist/index.js",
@@ -11,6 +11,7 @@
     },
     "keywords": [
         "hexa",
+        "hexa-framework",
         "redis",
         "cache",
         "adapter",
@@ -28,11 +29,11 @@
         "README.md"
     ],
     "peerDependencies": {
-        "@hexa/common": "^1.0.0",
+        "@hexa-framework/common": "^1.0.0",
         "redis": "^4.0.0"
     },
     "devDependencies": {
-        "@hexa/common": "^1.0.0",
+        "@hexa-framework/common": "^1.0.0",
         "@types/node": "^20.10.0",
         "redis": "^4.6.12",
         "rimraf": "^5.0.5",

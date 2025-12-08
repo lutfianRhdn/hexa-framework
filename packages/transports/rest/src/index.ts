@@ -16,7 +16,7 @@ import {
     MetadataResponse,
     JWTPayload,
     AuthenticatedUser,
-} from '@hexa/common';
+} from '@hexa-framework/common';
 
 // ============================================
 // REST Transport

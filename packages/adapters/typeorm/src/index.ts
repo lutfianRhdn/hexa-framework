@@ -15,7 +15,7 @@ import {
     QueryOptions,
     SearchConfig,
     FilterObject,
-} from '@hexa/common';
+} from '@hexa-framework/common';
 
 // ============================================
 // TypeORM Adapter

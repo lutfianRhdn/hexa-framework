@@ -1,5 +1,5 @@
 {
-    "name": "@hexa/transport-graphql",
+    "name": "@hexa-framework/transport-graphql",
     "version": "1.0.0",
     "description": "GraphQL transport layer for Hexa Framework (Apollo Server)",
     "main": "dist/index.js",
@@ -12,11 +12,11 @@
     },
     "keywords": [
         "hexa",
+        "hexa-framework",
         "graphql",
         "apollo",
         "transport",
-        "api",
-        "hexagonal-architecture"
+        "api"
     ],
     "author": "lutfian.rhdn",
     "license": "MIT",
@@ -30,12 +30,12 @@
         "README.md"
     ],
     "peerDependencies": {
-        "@hexa/common": "^1.0.0",
+        "@hexa-framework/common": "^1.0.0",
         "@apollo/server": "^4.0.0",
         "graphql": "^16.0.0"
     },
     "devDependencies": {
-        "@hexa/common": "^1.0.0",
+        "@hexa-framework/common": "^1.0.0",
         "@apollo/server": "^4.10.0",
         "@types/node": "^20.10.0",
         "graphql": "^16.8.1",
