@@ -1,6 +1,6 @@
 export type ProjectTemplate = 'empty' | 'basic-auth' | 'full-auth';
 
-export type AdapterType = 'prisma' | 'typeorm' | 'mongoose' | 'redis';
+export type AdapterType = 'prisma' | 'typeorm' | 'mongoose' | 'redis' | 'midtrans';
 
 export type TransportType = 'rest' | 'graphql' | 'websocket';
 

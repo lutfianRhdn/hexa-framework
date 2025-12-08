@@ -48,6 +48,10 @@ export function generateDependencies(config: ProjectConfig): DependencyMap {
     redis: {
       '@hexa-framework/adapter-redis': '^1.0.0',
       'redis': '^4.6.12'
+    },
+    midtrans: {
+      '@hexa-framework/adapter-midtrans': '^1.0.0',
+      'midtrans-client': '^1.3.1'
     }
   };
 
@@ -57,7 +61,8 @@ export function generateDependencies(config: ProjectConfig): DependencyMap {
     },
     typeorm: {},
     mongoose: {},
-    redis: {}
+    redis: {},
+    midtrans: {}
   };
 
   // Transport-specific dependencies

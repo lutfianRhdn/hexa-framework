@@ -48,6 +48,10 @@ export async function promptProjectConfig(projectName: string): Promise<ProjectC
         {
           name: chalk.red('Redis') + chalk.gray(' - In-memory data store'),
           value: 'redis'
+        },
+        {
+          name: chalk.yellow('Midtrans') + chalk.gray(' - Payment Gateway (Indonesia)'),
+          value: 'midtrans'
         }
       ],
       validate: (answer: string[]) => {
