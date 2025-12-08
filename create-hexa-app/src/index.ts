@@ -21,12 +21,15 @@ import { generateMainIndex } from './generators/mainIndex';
 import { generateReadme } from './generators/readme';
 import { GeneratorContext } from './types';
 
+// Read version from package.json
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf-8'));
+
 const program = new Command();
 
 program
   .name('create-hexa-app')
   .description('Create a new Hexa Framework project with customizable templates')
-  .version('2.0.0')
+  .version(packageJson.version)
   .argument('[project-name]', 'Name of the project')
   .option('-t, --template <type>', 'Project template: empty, basic-auth, or full-auth')
   .option('-a, --adapters <types>', 'Adapters (comma-separated): prisma, typeorm, mongoose, redis')
