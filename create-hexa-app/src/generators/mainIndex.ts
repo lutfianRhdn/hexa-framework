@@ -4,20 +4,15 @@ import { GeneratorContext } from '../types';
 
 export async function generateMainIndex(ctx: GeneratorContext): Promise<void> {
   const { srcPath, config } = ctx;
-  const { template, transports, database } = config;
+  const { template, transports, adapters } = config;
 
-  const hasAuth = template === 'basic-auth' || template === 'full-auth';
-  const hasREST = transports.includes('rest');
-  const hasGraphQL = transports.includes('graphql');
-  const hasWebSocket = transports.includes('websocket');
+  const indexContent = generateIndexContent(template, transports, adapters);
 
-  const indexContent = generateIndexContent(template, transports, database);
-  
   await fs.writeFile(path.join(srcPath, 'index.ts'), indexContent);
   console.log('  ✅ Main index.ts generated');
 }
 
-function generateIndexContent(template: string, transports: string[], database: string): string {
+function generateIndexContent(template: string, transports: string[], adapters: string[]): string {
   const hasAuth = template === 'basic-auth' || template === 'full-auth';
   const hasREST = transports.includes('rest');
   const hasGraphQL = transports.includes('graphql');
@@ -28,7 +23,20 @@ function generateIndexContent(template: string, transports: string[], database: 
 import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './configs/env';
-import prisma from './configs/database';`;
+`;
+
+  if (adapters.includes('prisma')) {
+    imports += `import prisma from './configs/database';\n`;
+  }
+  if (adapters.includes('typeorm')) {
+    imports += `import { AppDataSource } from './configs/typeorm';\n`;
+  }
+  if (adapters.includes('mongoose')) {
+    imports += `import { connectMongoDB } from './configs/mongoose';\n`;
+  }
+  if (adapters.includes('redis')) {
+    imports += `import { connectRedis } from './configs/redis';\n`;
+  }
 
   if (hasREST) {
     imports += `\nimport morgan from 'morgan';
@@ -40,7 +48,9 @@ import compression from 'compression';`;
   }
 
   if (hasAuth && hasREST) {
-    imports += `\nimport { PostgresUserRepository } from './adapters/${database === 'mongodb' ? 'mongodb' : 'postgres'}/repositories/PostgresUserRepository';
+    const isMongoDb = adapters.includes('mongoose');
+    const dbFolder = isMongoDb ? 'mongodb' : 'postgres';
+    imports += `\nimport { PostgresUserRepository } from './adapters/${dbFolder}/repositories/PostgresUserRepository';
 import { UserService } from './core/services/UserService';
 import { AuthService } from './core/services/AuthService';
 import { UserController } from './transports/api/controllers/UserController';
@@ -50,8 +60,10 @@ import { createAuthRouter } from './transports/api/routers/authRouter';`;
   }
 
   if (isFullAuth && hasREST) {
-    imports += `\nimport { PostgresRoleRepository } from './adapters/${database === 'mongodb' ? 'mongodb' : 'postgres'}/repositories/PostgresRoleRepository';
-import { PostgresPermissionRepository } from './adapters/${database === 'mongodb' ? 'mongodb' : 'postgres'}/repositories/PostgresPermissionRepository';
+    const isMongoDb = adapters.includes('mongoose');
+    const dbFolder = isMongoDb ? 'mongodb' : 'postgres';
+    imports += `\nimport { PostgresRoleRepository } from './adapters/${dbFolder}/repositories/PostgresRoleRepository';
+import { PostgresPermissionRepository } from './adapters/${dbFolder}/repositories/PostgresPermissionRepository';
 import { RoleService } from './core/services/RoleService';
 import { PermissionService } from './core/services/PermissionService';
 import { RoleController } from './transports/api/controllers/RoleController';
@@ -89,11 +101,29 @@ ${hasWebSocket ? `  const httpServer = createServer(app);\n` : ''}
   }
 
   setupFunction += `
-  // Test database connection
+  // Initialize adapters
   try {
-    await prisma.$connect();
-    console.log('✅ Database connected successfully');
-  } catch (error) {
+`;
+  if (adapters.includes('prisma')) {
+    setupFunction += `    await prisma.$connect();
+    console.log('✅ Prisma connected');
+`;
+  }
+  if (adapters.includes('typeorm')) {
+    setupFunction += `    await AppDataSource.initialize();
+    console.log('✅ TypeORM connected');
+`;
+  }
+  if (adapters.includes('mongoose')) {
+    setupFunction += `    await connectMongoDB();
+`;
+  }
+  if (adapters.includes('redis')) {
+    setupFunction += `    await connectRedis();
+`;
+  }
+
+  setupFunction += `  } catch (error) {
     console.error('❌ Database connection failed:', error);
     process.exit(1);
   }

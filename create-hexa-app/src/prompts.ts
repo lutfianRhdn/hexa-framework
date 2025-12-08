@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import { ProjectConfig, ProjectTemplate, DatabaseType, TransportType } from './types';
+import { ProjectConfig, ProjectTemplate, AdapterType, TransportType } from './types';
 
 export async function promptProjectConfig(projectName: string): Promise<ProjectConfig> {
   console.log(chalk.blue('\n🚀 Welcome to Hexa Framework v2.0!\n'));
@@ -28,33 +28,39 @@ export async function promptProjectConfig(projectName: string): Promise<ProjectC
       default: 'basic-auth'
     },
     {
-      type: 'list',
-      name: 'database',
-      message: 'Select database:',
+      type: 'checkbox',
+      name: 'adapters',
+      message: 'Select data adapters (Space to select):',
       choices: [
         {
-          name: chalk.blue('PostgreSQL') + chalk.gray(' - Powerful, open source object-relational database'),
-          value: 'postgresql'
+          name: chalk.blue('Prisma') + chalk.gray(' - Modern ORM (PostgreSQL, MySQL, SQLite)'),
+          value: 'prisma',
+          checked: true
         },
         {
-          name: chalk.cyan('MySQL') + chalk.gray(' - Popular open-source relational database'),
-          value: 'mysql'
+          name: chalk.cyan('TypeORM') + chalk.gray(' - Traditional ORM'),
+          value: 'typeorm'
         },
         {
-          name: chalk.green('MongoDB') + chalk.gray(' - NoSQL document database'),
-          value: 'mongodb'
+          name: chalk.green('Mongoose') + chalk.gray(' - MongoDB ODM'),
+          value: 'mongoose'
         },
         {
-          name: chalk.magenta('SQLite') + chalk.gray(' - Lightweight, file-based database'),
-          value: 'sqlite'
+          name: chalk.red('Redis') + chalk.gray(' - In-memory data store'),
+          value: 'redis'
         }
       ],
-      default: 'postgresql'
+      validate: (answer: string[]) => {
+        if (answer.length < 1) {
+          return 'You must choose at least one adapter.';
+        }
+        return true;
+      }
     },
     {
       type: 'checkbox',
       name: 'transports',
-      message: 'Select transport layers (Space to select, Enter to confirm):',
+      message: 'Select transport layers (Space to select):',
       choices: [
         {
           name: chalk.blue('REST API') + chalk.gray(' - Traditional HTTP REST endpoints'),
@@ -82,14 +88,14 @@ export async function promptProjectConfig(projectName: string): Promise<ProjectC
   console.log(chalk.gray('\n📋 Project Configuration:'));
   console.log(chalk.gray('  Name:       ') + chalk.white(projectName));
   console.log(chalk.gray('  Template:   ') + chalk.white(answers.template));
-  console.log(chalk.gray('  Database:   ') + chalk.white(answers.database));
+  console.log(chalk.gray('  Adapters:   ') + chalk.white(answers.adapters.join(', ')));
   console.log(chalk.gray('  Transports: ') + chalk.white(answers.transports.join(', ')));
   console.log();
 
   return {
     name: projectName,
     template: answers.template as ProjectTemplate,
-    database: answers.database as DatabaseType,
+    adapters: answers.adapters as AdapterType[],
     transports: answers.transports as TransportType[]
   };
 }

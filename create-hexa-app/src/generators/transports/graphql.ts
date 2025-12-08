@@ -5,7 +5,7 @@ import { GeneratorContext } from '../../types';
 export async function generateGraphQLTransport(ctx: GeneratorContext): Promise<void> {
   const { srcPath, config } = ctx;
   const transportPath = path.join(srcPath, 'transports', 'graphql');
-  
+
   await fs.ensureDir(path.join(transportPath, 'resolvers'));
   await fs.ensureDir(path.join(transportPath, 'types'));
 
@@ -14,9 +14,11 @@ export async function generateGraphQLTransport(ctx: GeneratorContext): Promise<v
 
   // Generate auth-specific resolvers and types
   if (config.template === 'basic-auth' || config.template === 'full-auth') {
+    const isMongoDb = config.adapters.includes('mongoose');
+    const dbType = isMongoDb ? 'mongodb' : 'postgres';
     await generateUserType(transportPath);
     await generateUserResolver(transportPath);
-    await generateAuthResolver(transportPath, config.database);
+    await generateAuthResolver(transportPath, dbType);
   }
 
   // Generate role/permission resolvers for full auth
@@ -34,12 +36,12 @@ async function generateGraphQLConfig(transportPath: string, template: string) {
   // Build resolver imports based on template
   let resolverImports = `import { AuthResolver } from './resolvers/AuthResolver';\nimport { UserResolver } from './resolvers/UserResolver';`;
   let resolverArray = '[AuthResolver, UserResolver]';
-  
+
   if (template === 'full-auth') {
     resolverImports += `\nimport { RoleResolver } from './resolvers/RoleResolver';\nimport { PermissionResolver } from './resolvers/PermissionResolver';`;
     resolverArray = '[AuthResolver, UserResolver, RoleResolver, PermissionResolver]';
   }
-  
+
   const config = `import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import { Express, Application } from 'express';

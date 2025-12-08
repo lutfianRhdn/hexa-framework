@@ -4,7 +4,7 @@ import { GeneratorContext } from '../types';
 
 export async function generateReadme(ctx: GeneratorContext): Promise<void> {
   const { projectPath, config } = ctx;
-  const { name: projectName, template, database, transports } = config;
+  const { name: projectName, template, adapters, transports } = config;
 
   const readme = `# ${projectName}
 
@@ -14,7 +14,7 @@ A ${template} project built with Hexa Framework.
 
 - **Framework**: Hexa Framework (Hexagonal Architecture)
 - **Language**: TypeScript
-- **Database**: ${database.toUpperCase()}${transports.length > 0 ? `
+- **Adapters**: ${adapters.map(a => a.toUpperCase()).join(', ')}${transports.length > 0 ? `
 - **Transport Layers**: ${transports.map(t => t.toUpperCase()).join(', ')}` : ''}${template !== 'empty' ? `
 - **Authentication**: JWT` : ''}${template === 'full-auth' ? `
 - **Authorization**: RBAC (Role-Based Access Control)` : ''}
@@ -384,7 +384,15 @@ PORT=3000
 NODE_ENV=development
 
 # Database
-DATABASE_URL="${database === 'sqlite' ? 'file:./dev.db' : `${database}://user:password@localhost:5432/dbname`}"
+${adapters.includes('prisma') ? `DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+` : ''}${adapters.includes('typeorm') ? `DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_NAME=hexa_db
+` : ''}${adapters.includes('mongoose') ? `MONGODB_URI="mongodb://localhost:27017/hexa_db"
+` : ''}${adapters.includes('redis') ? `REDIS_URL="redis://localhost:6379"
+` : ''}
 
 ${template !== 'empty' ? `# JWT
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production

@@ -1,6 +1,6 @@
 {
   "name": "create-hexa-framework-app",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "Create Hexa Framework project with customizable templates, databases, and transport layers. Includes powerful CLI like Laravel Artisan!",
   "bin": {
     "create-hexa-app": "./dist/index.js"
@@ -47,4 +47,3 @@
     "typescript": "^5.3.3"
   }
 }
-

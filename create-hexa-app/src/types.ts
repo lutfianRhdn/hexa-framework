@@ -1,13 +1,13 @@
 export type ProjectTemplate = 'empty' | 'basic-auth' | 'full-auth';
 
-export type DatabaseType = 'postgresql' | 'mysql' | 'mongodb' | 'sqlite';
+export type AdapterType = 'prisma' | 'typeorm' | 'mongoose' | 'redis';
 
 export type TransportType = 'rest' | 'graphql' | 'websocket';
 
 export interface ProjectConfig {
   name: string;
   template: ProjectTemplate;
-  database: DatabaseType;
+  adapters: AdapterType[];
   transports: TransportType[];
 }
 

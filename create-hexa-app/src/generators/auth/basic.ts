@@ -4,7 +4,8 @@ import { GeneratorContext } from '../../types';
 
 export async function generateBasicAuth(ctx: GeneratorContext): Promise<void> {
   const { srcPath, config } = ctx;
-  const isMongoDb = config.database === 'mongodb';
+  const isMongoDb = config.adapters.includes('mongoose');
+  const databaseType = isMongoDb ? 'mongodb' : 'postgres';
 
   // Create User entity
   await generateUserEntity(srcPath, isMongoDb);
@@ -13,7 +14,7 @@ export async function generateBasicAuth(ctx: GeneratorContext): Promise<void> {
   await generateUserRepositoryInterface(srcPath);
 
   // Create Postgres/MySQL repository implementation
-  await generateUserRepository(srcPath, config.database);
+  await generateUserRepository(srcPath, databaseType);
 
   // Create User service
   await generateUserService(srcPath);
@@ -35,7 +36,7 @@ export async function generateBasicAuth(ctx: GeneratorContext): Promise<void> {
 
 async function generateUserEntity(srcPath: string, isMongoDb: boolean) {
   const idType = isMongoDb ? 'string' : 'number';
-  
+
   const entity = `export interface User {
   id: ${idType};
   email: string;

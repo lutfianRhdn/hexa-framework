@@ -158,7 +158,7 @@ export class LoggingPlugin implements IPlugin {
                 requestLog.headers = req.headers as Record<string, string>;
             }
 
-            this.logger.info(`→ ${req.method} ${req.path}`, requestLog);
+            this.logger.info(`→ ${req.method} ${req.path}`, requestLog as unknown as Record<string, unknown>);
 
             // Capture response
             const originalEnd = res.end;
@@ -171,9 +171,9 @@ export class LoggingPlugin implements IPlugin {
                 };
 
                 const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'info';
-                this.logger[level](`← ${res.statusCode} ${req.method} ${req.path} (${responseLog.duration}ms)`, responseLog);
+                this.logger[level](`← ${res.statusCode} ${req.method} ${req.path} (${responseLog.duration}ms)`, responseLog as unknown as Record<string, unknown>);
 
-                return originalEnd.apply(res, args);
+                return originalEnd.apply(res, args as [any, any, any?]);
             }) as any;
 
             next();

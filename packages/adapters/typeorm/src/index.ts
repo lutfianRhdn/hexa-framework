@@ -48,7 +48,7 @@ export class TypeORMAdapter implements IDatabaseAdapter<DataSource> {
             entities: config.entities || ['src/**/entities/*.ts'],
             synchronize: config.synchronize ?? false,
             logging: config.logging ?? false,
-        });
+        } as any);
     }
 
     async connect(): Promise<void> {

@@ -10,7 +10,7 @@ import inquirer from 'inquirer';
 import { promptProjectConfig } from './prompts';
 import { generatePackageJson } from './generators/packageJson';
 import { generateBaseStructure } from './generators/base';
-import { generateDatabaseConfig } from './generators/database';
+import { generateAdaptersConfig } from './generators/adapters';
 import { generateEmptyTemplate } from './generators/auth/empty';
 import { generateBasicAuth } from './generators/auth/basic';
 import { generateFullAuth } from './generators/auth/full';
@@ -29,7 +29,7 @@ program
   .version('2.0.0')
   .argument('[project-name]', 'Name of the project')
   .option('-t, --template <type>', 'Project template: empty, basic-auth, or full-auth')
-  .option('-d, --database <type>', 'Database: postgresql, mysql, mongodb, or sqlite')
+  .option('-a, --adapters <types>', 'Adapters (comma-separated): prisma, typeorm, mongoose, redis')
   .option('-r, --transports <types>', 'Transports (comma-separated): rest, graphql, websocket')
   .option('-y, --yes', 'Skip confirmation prompt')
   .action(async (projectName?: string, options?: any) => {
@@ -64,12 +64,12 @@ program
 
       // Use CLI options or prompt interactively
       let config;
-      if (options?.template && options?.database && options?.transports) {
+      if (options?.template && options?.adapters && options?.transports) {
         // Non-interactive mode
         config = {
           name: projectName,
           template: options.template as any,
-          database: options.database as any,
+          adapters: options.adapters.split(',').map((t: string) => t.trim()) as any[],
           transports: options.transports.split(',').map((t: string) => t.trim()) as any[]
         };
       } else {
@@ -79,7 +79,7 @@ program
 
       console.log(chalk.cyan('\n📋 Configuration Summary:'));
       console.log(chalk.gray(`  Template: ${chalk.white(config.template)}`));
-      console.log(chalk.gray(`  Database: ${chalk.white(config.database)}`));
+      console.log(chalk.gray(`  Adapters: ${chalk.white(config.adapters.join(', '))}`));
       console.log(chalk.gray(`  Transports: ${chalk.white(config.transports.join(', '))}\n`));
 
       if (!options?.yes) {
@@ -110,9 +110,9 @@ program
       await generatePackageJson(ctx);
       spinner.succeed('package.json generated');
 
-      spinner = ora('Configuring database').start();
-      await generateDatabaseConfig(ctx);
-      spinner.succeed('Database configured');
+      spinner = ora('Configuring adapters').start();
+      await generateAdaptersConfig(ctx);
+      spinner.succeed('Adapters configured');
 
       if (config.template === 'empty') {
         spinner = ora('Setting up empty template').start();
@@ -159,7 +159,7 @@ program
 
       console.log(chalk.cyan('\n📥 Installing dependencies...\n'));
       spinner = ora('Installing npm packages (this may take a while)').start();
-      
+
       try {
         execSync('npm install', { cwd: projectPath, stdio: 'ignore' });
         spinner.succeed('Dependencies installed');

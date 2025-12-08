@@ -68,8 +68,9 @@ export class MongooseAdapter implements IDatabaseAdapter<Connection> {
 // Base Mongoose Repository
 // ============================================
 
-export interface MongooseDocument extends Document, IBaseEntity {
+export interface MongooseDocument extends Document, Omit<IBaseEntity, 'id'> {
     _id: mongoose.Types.ObjectId;
+    id: string; // Explicitly define id compatibly
 }
 
 /**
@@ -225,4 +226,4 @@ export function createMongooseAdapter(config: MongooseAdapterConfig): MongooseAd
 }
 
 // Re-export types
-export { mongoose, Schema, Model, Document } from 'mongoose';
+export { default as mongoose, Schema, Model, Document } from 'mongoose';

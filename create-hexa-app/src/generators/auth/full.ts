@@ -8,18 +8,19 @@ export async function generateFullAuth(ctx: GeneratorContext): Promise<void> {
   await generateBasicAuth(ctx);
 
   const { srcPath, config } = ctx;
-  const isMongoDb = config.database === 'mongodb';
+  const isMongoDb = config.adapters.includes('mongoose');
+  const databaseType = isMongoDb ? 'mongodb' : 'postgres';
 
   // Add Role and Permission entities
   await generateRoleEntity(srcPath, isMongoDb);
   await generatePermissionEntity(srcPath, isMongoDb);
 
   // Add Role repository
-  await generateRoleRepository(srcPath, config.database);
+  await generateRoleRepository(srcPath, databaseType);
   await generateRoleRepositoryInterface(srcPath);
 
   // Add Permission repository
-  await generatePermissionRepository(srcPath, config.database);
+  await generatePermissionRepository(srcPath, databaseType);
   await generatePermissionRepositoryInterface(srcPath);
 
   // Add Role service
@@ -29,7 +30,7 @@ export async function generateFullAuth(ctx: GeneratorContext): Promise<void> {
   await generatePermissionService(srcPath);
 
   // Add permission middleware
-  await generatePermissionMiddleware(srcPath, config.database);
+  await generatePermissionMiddleware(srcPath, databaseType);
 
   // Add role/permission validation
   await generateRolePermissionValidation(srcPath);
