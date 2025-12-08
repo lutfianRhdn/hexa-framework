@@ -1,0 +1,49 @@
+{
+    "name": "@hexa/transport-rest",
+    "version": "1.0.0",
+    "description": "REST transport layer for Hexa Framework (Express.js)",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "clean": "rimraf dist",
+        "prebuild": "npm run clean",
+        "watch": "tsc --watch"
+    },
+    "keywords": [
+        "hexa",
+        "rest",
+        "express",
+        "transport",
+        "api",
+        "hexagonal-architecture"
+    ],
+    "author": "lutfian.rhdn",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lutfianrhdn/hexa-framework.git",
+        "directory": "packages/transports/rest"
+    },
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "peerDependencies": {
+        "@hexa/common": "^1.0.0",
+        "express": "^4.18.0"
+    },
+    "dependencies": {
+        "jsonwebtoken": "^9.0.2",
+        "zod": "^3.22.4"
+    },
+    "devDependencies": {
+        "@hexa/common": "^1.0.0",
+        "@types/express": "^4.17.21",
+        "@types/jsonwebtoken": "^9.0.5",
+        "@types/node": "^20.10.0",
+        "express": "^4.18.2",
+        "rimraf": "^5.0.5",
+        "typescript": "^5.3.0"
+    }
+}

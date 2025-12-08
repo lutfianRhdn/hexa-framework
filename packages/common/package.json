@@ -1,0 +1,40 @@
+{
+    "name": "@hexa/common",
+    "version": "1.0.0",
+    "description": "Shared interfaces and types for Hexa Framework ecosystem",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "clean": "rimraf dist",
+        "prebuild": "npm run clean",
+        "watch": "tsc --watch"
+    },
+    "keywords": [
+        "hexa",
+        "hexagonal-architecture",
+        "typescript",
+        "interfaces",
+        "types"
+    ],
+    "author": "lutfian.rhdn",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lutfianrhdn/hexa-framework.git",
+        "directory": "packages/common"
+    },
+    "homepage": "https://github.com/lutfianrhdn/hexa-framework#readme",
+    "bugs": {
+        "url": "https://github.com/lutfianrhdn/hexa-framework/issues"
+    },
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "rimraf": "^5.0.5",
+        "typescript": "^5.3.0"
+    }
+}

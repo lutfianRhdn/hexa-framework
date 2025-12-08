@@ -1,0 +1,45 @@
+{
+    "name": "@hexa/transport-graphql",
+    "version": "1.0.0",
+    "description": "GraphQL transport layer for Hexa Framework (Apollo Server)",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "clean": "rimraf dist",
+        "prebuild": "npm run clean",
+        "watch": "tsc --watch"
+    },
+    "keywords": [
+        "hexa",
+        "graphql",
+        "apollo",
+        "transport",
+        "api",
+        "hexagonal-architecture"
+    ],
+    "author": "lutfian.rhdn",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lutfianrhdn/hexa-framework.git",
+        "directory": "packages/transports/graphql"
+    },
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "peerDependencies": {
+        "@hexa/common": "^1.0.0",
+        "@apollo/server": "^4.0.0",
+        "graphql": "^16.0.0"
+    },
+    "devDependencies": {
+        "@hexa/common": "^1.0.0",
+        "@apollo/server": "^4.10.0",
+        "@types/node": "^20.10.0",
+        "graphql": "^16.8.1",
+        "rimraf": "^5.0.5",
+        "typescript": "^5.3.0"
+    }
+}

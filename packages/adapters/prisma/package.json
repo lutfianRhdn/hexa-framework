@@ -1,0 +1,44 @@
+{
+    "name": "@hexa/adapter-prisma",
+    "version": "1.0.0",
+    "description": "Prisma database adapter for Hexa Framework",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "clean": "rimraf dist",
+        "prebuild": "npm run clean",
+        "watch": "tsc --watch"
+    },
+    "keywords": [
+        "hexa",
+        "prisma",
+        "adapter",
+        "orm",
+        "database",
+        "hexagonal-architecture"
+    ],
+    "author": "lutfian.rhdn",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lutfianrhdn/hexa-framework.git",
+        "directory": "packages/adapters/prisma"
+    },
+    "homepage": "https://github.com/lutfianrhdn/hexa-framework#readme",
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "peerDependencies": {
+        "@hexa/common": "^1.0.0",
+        "@prisma/client": "^5.0.0"
+    },
+    "devDependencies": {
+        "@hexa/common": "^1.0.0",
+        "@prisma/client": "^5.7.0",
+        "@types/node": "^20.10.0",
+        "rimraf": "^5.0.5",
+        "typescript": "^5.3.0"
+    }
+}
