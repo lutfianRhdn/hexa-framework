@@ -133,7 +133,7 @@ export async function generatePackageJson(ctx: { config: ProjectConfig; projectP
       hexa: './dist/cli/hexa-cli.js'
     },
     scripts: {
-      dev: 'ts-node-dev --respawn --transpile-only src/index.ts',
+      dev: 'npx hexa serve',
       build: 'tsc && tsc --project cli/tsconfig.json',
       start: 'node dist/index.js',
       hexa: 'ts-node cli/hexa-cli.ts',

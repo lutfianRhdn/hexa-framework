@@ -23,6 +23,8 @@ function generateIndexContent(template: string, transports: string[], adapters: 
 import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './configs/env';
+import { createLoggingMiddleware } from '@hexa-framework/plugin-logging';
+import { createRateLimiter } from '@hexa-framework/plugin-rate-limit';
 `;
 
   if (adapters.includes('prisma')) {
@@ -87,7 +89,11 @@ import { createPermissionRouter } from './transports/api/routers/permissionRoute
   let setupFunction = `\nasync function bootstrap() {
   const app: Express = express();
 ${hasWebSocket ? `  const httpServer = createServer(app);\n` : ''}
-  // Middleware
+  // Hexa Framework Middleware
+  app.use(createLoggingMiddleware());
+  app.use(createRateLimiter({ windowMs: 15 * 60 * 1000, max: 100 }));
+
+  // Standard Middleware
   app.use(cors());
   app.use(helmet());
   app.use(express.json());
