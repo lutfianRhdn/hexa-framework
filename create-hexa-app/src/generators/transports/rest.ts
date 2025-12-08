@@ -5,7 +5,7 @@ import { GeneratorContext } from '../../types';
 export async function generateRestTransport(ctx: GeneratorContext): Promise<void> {
   const { srcPath, config } = ctx;
   const transportPath = path.join(srcPath, 'transports', 'api');
-  
+
   await fs.ensureDir(path.join(transportPath, 'controllers'));
   await fs.ensureDir(path.join(transportPath, 'routers'));
 
@@ -52,107 +52,52 @@ export default healthRouter;
 
 async function generateUserController(transportPath: string, template: string) {
   const controller = `import { Request, Response } from 'express';
+import { BaseController, AuthRequest } from '@hexa-framework/transport-rest';
 import { UserService } from '../../../core/services/UserService';
-import { createUserSchema, updateUserSchema } from '../validations/userValidation';
-import { AuthRequest } from '../../../policies/authMiddleware';
+import { validateCreateUser, validateUpdateUser } from '../validations/userValidation';
 
-export class UserController {
-  constructor(private userService: UserService) {}
-
-  async create(req: Request, res: Response): Promise<void> {
-    try {
-      const validatedData = createUserSchema.parse(req.body);
-      const user = await this.userService.createUser(validatedData);
-      
-      res.status(201).json({
-        success: true,
-        message: 'User created successfully',
-        data: user
-      });
-    } catch (error: any) {
-      res.status(400).json({
-        success: false,
-        message: error.message || 'Failed to create user'
-      });
-    }
+/**
+ * UserController extending BaseController from @hexa-framework/transport-rest
+ * Inherits: success(), created(), fail(), notFound(), serverError(), asyncHandler()
+ */
+export class UserController extends BaseController {
+  constructor(private userService: UserService) {
+    super();
   }
 
-  async getById(req: Request, res: Response): Promise<void> {
-    try {
-      const id = isNaN(Number(req.params.id)) ? req.params.id : Number(req.params.id);
-      const user = await this.userService.getUserById(id);
-      
-      res.json({
-        success: true,
-        data: user
-      });
-    } catch (error: any) {
-      res.status(404).json({
-        success: false,
-        message: error.message || 'User not found'
-      });
-    }
-  }
+  create = this.asyncHandler(async (req: Request, res: Response) => {
+    const user = await this.userService.createUser(req.body);
+    return this.created(res, user, 'User created successfully');
+  });
 
-  async getAll(req: Request, res: Response): Promise<void> {
-    try {
-      const page = Number(req.query.page) || 1;
-      const limit = Number(req.query.limit) || 10;
-      
-      const users = await this.userService.getAllUsers(page, limit);
-      
-      res.json({
-        success: true,
-        data: users,
-        pagination: {
-          page,
-          limit
-        }
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        success: false,
-        message: error.message || 'Failed to fetch users'
-      });
-    }
-  }
+  getById = this.asyncHandler(async (req: Request, res: Response) => {
+    const id = isNaN(Number(req.params.id)) ? req.params.id : Number(req.params.id);
+    const user = await this.userService.getUserById(id);
+    return this.success(res, user);
+  });
 
-  async update(req: AuthRequest, res: Response): Promise<void> {
-    try {
-      const id = isNaN(Number(req.params.id)) ? req.params.id : Number(req.params.id);
-      const validatedData = updateUserSchema.parse(req.body);
-      
-      const user = await this.userService.updateUser(id, validatedData);
-      
-      res.json({
-        success: true,
-        message: 'User updated successfully',
-        data: user
-      });
-    } catch (error: any) {
-      res.status(400).json({
-        success: false,
-        message: error.message || 'Failed to update user'
-      });
-    }
-  }
+  getAll = this.asyncHandler(async (req: Request, res: Response) => {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await this.userService.getAllUsers(page, limit);
+    return this.success(res, result.data, 'Success', { 
+      page, 
+      limit, 
+      total_records: result.total 
+    });
+  });
 
-  async delete(req: AuthRequest, res: Response): Promise<void> {
-    try {
-      const id = isNaN(Number(req.params.id)) ? req.params.id : Number(req.params.id);
-      await this.userService.deleteUser(id);
-      
-      res.json({
-        success: true,
-        message: 'User deleted successfully'
-      });
-    } catch (error: any) {
-      res.status(400).json({
-        success: false,
-        message: error.message || 'Failed to delete user'
-      });
-    }
-  }
+  update = this.asyncHandler(async (req: AuthRequest, res: Response) => {
+    const id = isNaN(Number(req.params.id)) ? req.params.id : Number(req.params.id);
+    const user = await this.userService.updateUser(id, req.body);
+    return this.success(res, user, 'User updated successfully');
+  });
+
+  delete = this.asyncHandler(async (req: AuthRequest, res: Response) => {
+    const id = isNaN(Number(req.params.id)) ? req.params.id : Number(req.params.id);
+    await this.userService.deleteUser(id);
+    return this.success(res, null, 'User deleted successfully');
+  });
 }
 `;
 
@@ -161,55 +106,28 @@ export class UserController {
 
 async function generateAuthController(transportPath: string) {
   const controller = `import { Request, Response } from 'express';
+import { BaseController, AuthRequest } from '@hexa-framework/transport-rest';
 import { AuthService } from '../../../core/services/AuthService';
-import { loginSchema } from '../validations/userValidation';
-import { AuthRequest } from '../../../policies/authMiddleware';
 
-export class AuthController {
-  constructor(private authService: AuthService) {}
-
-  async login(req: Request, res: Response): Promise<void> {
-    try {
-      const validatedData = loginSchema.parse(req.body);
-      const authResponse = await this.authService.login(validatedData);
-      
-      res.json({
-        success: true,
-        message: 'Login successful',
-        data: authResponse
-      });
-    } catch (error: any) {
-      res.status(401).json({
-        success: false,
-        message: error.message || 'Login failed'
-      });
-    }
+/**
+ * AuthController extending BaseController from @hexa-framework/transport-rest
+ */
+export class AuthController extends BaseController {
+  constructor(private authService: AuthService) {
+    super();
   }
 
-  async me(req: AuthRequest, res: Response): Promise<void> {
-    try {
-      if (!req.user) {
-        res.status(401).json({
-          success: false,
-          message: 'Not authenticated'
-        });
-        return;
-      }
+  login = this.asyncHandler(async (req: Request, res: Response) => {
+    const authResponse = await this.authService.login(req.body);
+    return this.success(res, authResponse, 'Login successful');
+  });
 
-      res.json({
-        success: true,
-        data: {
-          userId: req.user.userId,
-          email: req.user.email
-        }
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        success: false,
-        message: error.message || 'Failed to fetch user data'
-      });
+  me = this.asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      return this.fail(res, 'Not authenticated', [], 401);
     }
-  }
+    return this.success(res, req.user);
+  });
 }
 `;
 

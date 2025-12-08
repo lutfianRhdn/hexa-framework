@@ -115,73 +115,84 @@ async function generateUserRepository(srcPath: string, database: string) {
   await fs.ensureDir(repoPath);
   const isMongoDb = database === 'mongodb';
 
-  const repository = `import prisma from '../../../configs/database';
+  const repository = isMongoDb
+    ? `import { BaseMongooseRepository } from '@hexa-framework/adapter-mongoose';
+import { User, CreateUserDTO, UpdateUserDTO } from '../../../core/entities/User';
+import { IUserRepository } from '../../../core/repositories/IUserRepository';
+
+// For MongoDB, we need a custom implementation
+// BasePrismaRepository is for SQL databases
+export class PostgresUserRepository implements IUserRepository {
+  // MongoDB implementation would go here
+  // This is a placeholder - use mongoose model
+  async findById(id: number | string): Promise<User | null> {
+    throw new Error('MongoDB implementation pending');
+  }
+  async findAll(options?: any): Promise<User[]> {
+    throw new Error('MongoDB implementation pending');
+  }
+  async count(where?: any): Promise<number> {
+    throw new Error('MongoDB implementation pending');
+  }
+  async create(data: CreateUserDTO): Promise<User> {
+    throw new Error('MongoDB implementation pending');
+  }
+  async update(id: number | string, data: UpdateUserDTO): Promise<User> {
+    throw new Error('MongoDB implementation pending');
+  }
+  async delete(id: number | string): Promise<void> {
+    throw new Error('MongoDB implementation pending');
+  }
+  async findByEmail(email: string): Promise<User | null> {
+    throw new Error('MongoDB implementation pending');
+  }
+  async findByUsername(username: string): Promise<User | null> {
+    throw new Error('MongoDB implementation pending');
+  }
+  async softDelete(id: number | string): Promise<void> {
+    throw new Error('MongoDB implementation pending');
+  }
+}
+`
+    : `import { BasePrismaRepository, PrismaClient } from '@hexa-framework/adapter-prisma';
 import { IUserRepository } from '../../../core/repositories/IUserRepository';
 import { User, CreateUserDTO, UpdateUserDTO } from '../../../core/entities/User';
+import prisma from '../../../configs/database';
 
-export class PostgresUserRepository implements IUserRepository {
+/**
+ * UserRepository extending BasePrismaRepository from @hexa-framework/adapter-prisma
+ * Inherits: getById, getAll, create, update, softDelete, hardDelete, count, exists
+ */
+export class PostgresUserRepository extends BasePrismaRepository<User> implements IUserRepository {
+  protected modelName = 'user';
+
+  constructor() {
+    super(prisma);
+  }
+
+  // IUserRepository specific methods
   async findById(id: number | string): Promise<User | null> {
-    return await prisma.user.findUnique({
-      where: { id: ${isMongoDb ? 'id as string' : 'id as number'} }
-    });
+    return this.getById(id);
   }
 
-  async findAll(options?: {
-    skip?: number;
-    take?: number;
-    where?: any;
-  }): Promise<User[]> {
-    const users = await prisma.user.findMany({
-      skip: options?.skip,
-      take: options?.take,
-      where: options?.where
+  async findAll(options?: { skip?: number; take?: number; where?: any }): Promise<User[]> {
+    const result = await this.getAll({
+      pagination: { page: Math.floor((options?.skip || 0) / (options?.take || 10)) + 1, limit: options?.take || 10 },
+      filters: options?.where
     });
-    return users;
-  }
-
-  async count(where?: any): Promise<number> {
-    return await prisma.user.count({ where });
-  }
-
-  async create(data: CreateUserDTO): Promise<User> {
-    return await prisma.user.create({
-      data: {
-        ...data,
-        isActive: true
-      }
-    });
-  }
-
-  async update(id: number | string, data: UpdateUserDTO): Promise<User> {
-    return await prisma.user.update({
-      where: { id: ${isMongoDb ? 'id as string' : 'id as number'} },
-      data
-    });
+    return result.data;
   }
 
   async delete(id: number | string): Promise<void> {
-    await prisma.user.delete({
-      where: { id: ${isMongoDb ? 'id as string' : 'id as number'} }
-    });
+    return this.hardDelete(id);
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return await prisma.user.findUnique({
-      where: { email }
-    });
+    return await prisma.user.findUnique({ where: { email } });
   }
 
   async findByUsername(username: string): Promise<User | null> {
-    return await prisma.user.findUnique({
-      where: { username }
-    });
-  }
-
-  async softDelete(id: number | string): Promise<void> {
-    await prisma.user.update({
-      where: { id: ${isMongoDb ? 'id as string' : 'id as number'} },
-      data: { isActive: false }
-    });
+    return await prisma.user.findUnique({ where: { username } });
   }
 }
 `;
@@ -383,44 +394,16 @@ export function userResponseMapper(user: any): UserResponse {
 }
 
 async function generateAuthMiddleware(srcPath: string) {
-  const middleware = `import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+  const middleware = `import { createAuthMiddleware, AuthRequest } from '@hexa-framework/transport-rest';
 import { config } from '../configs/env';
 
-export interface AuthRequest extends Request {
-  user?: {
-    userId: number | string;
-    email: string;
-  };
-}
+// Create auth middleware using Hexa Framework
+export const authMiddleware = createAuthMiddleware({
+  jwtSecret: config.jwt.secret,
+});
 
-export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
-        success: false,
-        message: 'No token provided'
-      });
-    }
-
-    const token = authHeader.substring(7);
-
-    const decoded = jwt.verify(token, config.jwt.secret) as {
-      userId: number | string;
-      email: string;
-    };
-
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid token'
-    });
-  }
-}
+// Re-export AuthRequest type for use in controllers
+export type { AuthRequest };
 `;
 
   await fs.writeFile(path.join(srcPath, 'policies', 'authMiddleware.ts'), middleware);
@@ -431,6 +414,7 @@ async function generateUserValidation(srcPath: string) {
   await fs.ensureDir(validationDir);
 
   const validation = `import { z } from 'zod';
+import { validateBody } from '@hexa-framework/transport-rest';
 
 export const createUserSchema = z.object({
   email: z.string().email('Invalid email format'),
@@ -451,6 +435,11 @@ export const loginSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(1, 'Password is required')
 });
+
+// Pre-built validation middleware
+export const validateCreateUser = validateBody(createUserSchema);
+export const validateUpdateUser = validateBody(updateUserSchema);
+export const validateLogin = validateBody(loginSchema);
 `;
 
   await fs.writeFile(path.join(validationDir, 'userValidation.ts'), validation);
