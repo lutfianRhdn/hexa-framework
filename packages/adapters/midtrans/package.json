@@ -1,0 +1,42 @@
+{
+    "name": "@hexa-framework/adapter-midtrans",
+    "version": "1.0.0",
+    "description": "Midtrans payment adapter for Hexa Framework",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "clean": "rimraf dist",
+        "prebuild": "npm run clean"
+    },
+    "keywords": [
+        "hexa",
+        "hexa-framework",
+        "midtrans",
+        "payment",
+        "adapter",
+        "gateway"
+    ],
+    "author": "lutfian.rhdn",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lutfianrhdn/hexa-framework.git",
+        "directory": "packages/adapters/midtrans"
+    },
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "peerDependencies": {
+        "@hexa-framework/common": "^1.0.0",
+        "midtrans-client": "^1.3.0"
+    },
+    "devDependencies": {
+        "@hexa-framework/common": "^1.0.0",
+        "@types/node": "^20.10.0",
+        "midtrans-client": "^1.3.1",
+        "rimraf": "^5.0.5",
+        "typescript": "^5.3.0"
+    }
+}

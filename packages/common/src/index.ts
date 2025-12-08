@@ -447,3 +447,83 @@ export interface ICache {
      */
     exists(key: string): Promise<boolean>;
 }
+
+// ============================================
+// Payment Interface
+// ============================================
+
+export type PaymentStatus = 'pending' | 'success' | 'failed' | 'expired' | 'canceled';
+
+export interface PaymentItem {
+    id: string;
+    price: number;
+    quantity: number;
+    name: string;
+    brand?: string;
+    category?: string;
+}
+
+export interface CustomerDetails {
+    firstName: string;
+    lastName?: string;
+    email: string;
+    phone?: string;
+    billingAddress?: Address;
+    shippingAddress?: Address;
+}
+
+export interface Address {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    address: string;
+    city: string;
+    postalCode: string;
+    countryCode: string;
+}
+
+export interface PaymentRequest {
+    orderId: string;
+    amount: number;
+    currency?: string;
+    items?: PaymentItem[];
+    customer?: CustomerDetails;
+    description?: string;
+    metadata?: Record<string, unknown>;
+    paymentMethod?: string; // e.g., 'credit_card', 'gopay', 'bank_transfer'
+    returnUrl?: string; // Redirect URL after payment
+    cancelUrl?: string;
+}
+
+export interface PaymentResult {
+    transactionId: string;
+    status: PaymentStatus;
+    redirectUrl?: string; // For redirect-based payments (e.g. Midtrans Snap)
+    token?: string; // For frontend SDKs
+    raw?: unknown; // Raw response from provider
+}
+
+export interface IPaymentAdapter {
+    readonly name: string;
+
+    /**
+     * Create a payment transaction
+     */
+    createTransaction(request: PaymentRequest): Promise<PaymentResult>;
+
+    /**
+     * Check transaction status
+     */
+    checkStatus(transactionId: string): Promise<PaymentStatus>;
+
+    /**
+     * Handle webhook/notification
+     * Returns the parsed status and the raw event to verify signature
+     */
+    verifyNotification(payload: unknown): Promise<{
+        orderId: string;
+        transactionId: string;
+        status: PaymentStatus;
+        raw: unknown;
+    }>;
+}
